@@ -1,0 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300..800;1,300..800&family=Noto+Emoji:wght@300..700&display=swap"')
+
+.login-pf {
+	background: none !important;
+}
+
+.login-pf body {
+	background: url('../img/scott-pilgrim-band-rehearsal-ixd6cf7cmint2agk.jpg');
+	background-size: cover !important;
+	font-family: 'Host Grotesk', sans-serif !important;
+}
+
+body {
+	font-family: 'Host Grotesk', sans-serif !important;
+}
+
+.login-pf-page {
+	position: absolute;
+	top: 50% !important;
+	bottom: auto !important;
+	transform: translateY(-50%);
+	width: 100%;
+}
+
+#kc-header-wrapper {
+	font-weight: 700;
+}

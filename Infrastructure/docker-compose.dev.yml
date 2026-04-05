@@ -1,0 +1,51 @@
+services:
+  doorlist_keycloak_db:
+    image: postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloakuser
+      POSTGRES_PASSWORD: secretpass
+    ports:
+      - "5433:5432"
+    networks:
+      - doorlist_services
+
+  doorlist_keycloak:
+    image:
+      keycloak/keycloak:26.1
+    command: start-dev --import-realm --features=dpop
+    restart: unless-stopped
+    depends_on:
+      - doorlist_keycloak_db
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://doorlist_keycloak_db:5432/keycloak
+      KC_DB_USERNAME: keycloakuser
+      KC_DB_PASSWORD: secretpass
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: adminpass
+      KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/certs/doorlist.keycloak.dev.crt
+      KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/certs/doorlist.keycloak.dev.key
+
+      KC_SPI_THEME_STATIC_MAX_AGE: "-1"
+      KC_SPI_THEME_CACHE_THEMES: "false"
+      KC_SPI_THEME_CACHE_TEMPLATES: "false"
+    volumes:
+      - ./Keycloak/realm-export.keycloak.dev.json:/opt/keycloak/data/import/realm-export.json
+      - ./certs/doorlist.keycloak.dev.crt:/opt/keycloak/certs/doorlist.keycloak.dev.crt
+      - ./certs/doorlist.keycloak.dev.key:/opt/keycloak/certs/doorlist.keycloak.dev.key
+      - ./Keycloak/themes/doorlist:/opt/keycloak/themes/doorlist
+      - doorlist_keycloak_data:/opt/keycloak/data
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    networks:
+      - doorlist_services
+
+volumes:
+  doorlist_keycloak_data:
+
+networks:
+  doorlist_services:
+    driver: bridge

@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Doorlist.Application/Doorlist.Application.csproj" />
+    <Project Path="src/Doorlist.Domain/Doorlist.Domain.csproj" />
+    <Project Path="src/Doorlist.Infrastructure/Doorlist.Infrastructure.csproj" />
+    <Project Path="src/Doorlist.Presentation/Doorlist.Presentation.csproj" />
+  </Folder>
+</Solution>

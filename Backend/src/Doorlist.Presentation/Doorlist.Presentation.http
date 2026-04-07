@@ -1,0 +1,6 @@
+@Doorlist.Presentation_HostAddress = http://localhost:5229
+
+GET {{Doorlist.Presentation_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

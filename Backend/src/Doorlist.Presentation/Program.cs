@@ -60,8 +60,8 @@ builder.Services.AddAuthorization(options =>
 });
 
 // Services
-//builder.Services.AddApplicationServices();
-//builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructureServices(builder.Configuration);
 
 // CORS
 builder.Services.AddCors(options =>

@@ -1,13 +1,11 @@
 namespace Doorlist.Infrastructure.Security;
 
-using System.Security;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 /**
  * PostQuantumStartupService:
@@ -64,7 +62,6 @@ public class PostQuantumStartupService : IHostedService
             return (false, String.Empty);
         }
     }
-    
     
     /// <summary>
     /// A string parser for the OpenSSL output. 

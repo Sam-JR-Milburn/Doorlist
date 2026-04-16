@@ -1,0 +1,14 @@
+# Deny-By-Default: Positives
+!**/doorlist.api.dev.key
+!**/doorlist.api.dev.crt
+!**/doorlist.api.dev.pfx
+!**/doorlist.keycloak.dev.key
+!**/doorlist.keycloak.dev.crt
+!**/doorlist.ca.dev.crt
+# Deny-By-Default: Negatives
+**/*.key
+**/*.pfx
+**/*.p12
+**/*.crt
+**/*.pem
+**/*.csr

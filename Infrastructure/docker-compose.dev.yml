@@ -10,6 +10,11 @@ services:
       - "5433:5432"
     networks:
       - doorlist_services
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloakuser -d keycloak"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   doorlist_keycloak:
     image:
@@ -17,7 +22,8 @@ services:
     command: start-dev --import-realm --features=dpop
     restart: unless-stopped
     depends_on:
-      - doorlist_keycloak_db
+      doorlist_keycloak_db:
+        condition: service_healthy
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://doorlist_keycloak_db:5432/keycloak
@@ -32,19 +38,20 @@ services:
       KC_SPI_THEME_CACHE_THEMES: "false"
       KC_SPI_THEME_CACHE_TEMPLATES: "false"
     volumes:
-      - ./Keycloak/realm-export.keycloak.dev.json:/opt/keycloak/data/import/realm-export.json
+      # Theme
+      - ./Keycloak/themes/doorlist:/opt/keycloak/themes/doorlist
+
+      # SSL
       - ./certs/doorlist.keycloak.dev.crt:/opt/keycloak/certs/doorlist.keycloak.dev.crt
       - ./certs/doorlist.keycloak.dev.key:/opt/keycloak/certs/doorlist.keycloak.dev.key
-      - ./Keycloak/themes/doorlist:/opt/keycloak/themes/doorlist
-      - doorlist_keycloak_data:/opt/keycloak/data
+
+      # Realm config
+      - ./Keycloak/realm-export.keycloak.dev.json:/opt/keycloak/data/import/realm-export.json
     ports:
       - "8080:8080"
       - "8443:8443"
     networks:
       - doorlist_services
-
-volumes:
-  doorlist_keycloak_data:
 
 networks:
   doorlist_services:

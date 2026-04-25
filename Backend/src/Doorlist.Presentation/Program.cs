@@ -22,6 +22,15 @@ builder.Services.AddSwaggerGen(options =>
         In = ParameterLocation.Header,
         Description = "Paste a Keycloak access token obtained from POST /realms/doorlist/protocol/openid-connect/token"
     });
+    
+    // UI Option
+    options.AddSecurityRequirement(doc => new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecuritySchemeReference("Bearer", doc),
+            []
+        }
+    });
 });
 
 // Auth
@@ -29,14 +38,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.MapInboundClaims = false;
-        options.Authority = builder.Configuration["Keycloak:BaseUrl"] + "/realms/doorlist";
+        options.Authority = builder.Configuration["Keycloak:BaseUrl"] + "/realms/" + builder.Configuration["Keycloak:Realm"];
         options.Audience = "account";
         options.RequireHttpsMetadata = true;
         
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["Keycloak:BaseUrl"] + "/realms/doorlist",
+            ValidIssuer = builder.Configuration["Keycloak:BaseUrl"] + "/realms/" + builder.Configuration["Keycloak:Realm"],
             ValidateAudience = true,
             ValidAudience = "account",
             ValidateLifetime = true,

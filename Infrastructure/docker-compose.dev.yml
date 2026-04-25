@@ -1,11 +1,13 @@
 services:
   doorlist_keycloak_db:
-    image: postgres:18
+    image: postgres:16
+    env_file:
+      - dev.env
     restart: unless-stopped
     environment:
       POSTGRES_DB: keycloak
-      POSTGRES_USER: keycloakuser
-      POSTGRES_PASSWORD: secretpass
+      POSTGRES_USER: ${Doorlist_KC_DB_USER}
+      POSTGRES_PASSWORD: ${Doorlist_KC_DB_PASSWORD}
     ports:
       - "5433:5432"
     networks:
@@ -17,8 +19,9 @@ services:
       retries: 5
 
   doorlist_keycloak:
-    image:
-      keycloak/keycloak:26.1
+    image: keycloak/keycloak:26.1
+    env_file:
+      - dev.env
     command: start-dev --import-realm --features=dpop
     restart: unless-stopped
     depends_on:
@@ -27,10 +30,10 @@ services:
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://doorlist_keycloak_db:5432/keycloak
-      KC_DB_USERNAME: keycloakuser
-      KC_DB_PASSWORD: secretpass
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: adminpass
+      KC_DB_USERNAME: ${Doorlist_KC_DB_USER}
+      KC_DB_PASSWORD: ${Doorlist_KC_DB_PASSWORD}
+      KEYCLOAK_ADMIN: ${Doorlist_KC_ADMIN_USER}
+      KEYCLOAK_ADMIN_PASSWORD: ${Doorlist_KC_ADMIN_PASSWORD}
       KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/certs/doorlist.keycloak.dev.crt
       KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/certs/doorlist.keycloak.dev.key
 

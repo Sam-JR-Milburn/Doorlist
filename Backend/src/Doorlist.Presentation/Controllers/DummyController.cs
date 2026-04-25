@@ -17,4 +17,15 @@ public class DummyController : Controller
         DateTime now = DateTime.Now;
         return Ok(now.ToString("HH:mm:ss") + "\n");
     }
+    
+    [HttpGet("public")]
+    public IActionResult Public() => Ok();
+    
+    [HttpGet("protected")]
+    [Authorize(Policy = "UserPolicy")]
+    public IActionResult Protected() => Ok();
+    
+    [HttpGet("also-protected")]
+    [Authorize(Policy = "AdminPolicy")]
+    public IActionResult AlsoProtected() => Ok();
 }

@@ -12,7 +12,7 @@ using Microsoft.Extensions.Hosting;
 public class ConfigurationValidatorService : IHostedService
 {
     private readonly IConfiguration _configuration;
-    private readonly  ILogger<ConfigurationValidatorService> _logger;
+    private readonly ILogger<ConfigurationValidatorService> _logger;
     private readonly IHostApplicationLifetime _applicationLifetime;
     public ConfigurationValidatorService(
         IConfiguration configuration, 
@@ -125,7 +125,7 @@ public class ConfigurationValidatorService : IHostedService
         if (failures.Count > 0)
         {
             _logger.LogError($"Configuration validation failed with {failures.Count} failures.");
-            _applicationLifetime.StopApplication();
+            _applicationLifetime.StopApplication(); // Graceful shutdown.
         }
         else
         {

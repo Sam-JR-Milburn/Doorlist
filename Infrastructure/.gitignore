@@ -1,14 +1,17 @@
-# Deny-By-Default: Positives
+# Deny-By-Default
+**/*.key
+**/*.pfx
+**/*.p12
+**/*.pem
+**/*.csr
+**/*.crt
+**/*.env
+
+# Allow Specific Dev Artifacts
 !**/doorlist.api.dev.key
 !**/doorlist.api.dev.crt
 !**/doorlist.api.dev.pfx
 !**/doorlist.keycloak.dev.key
 !**/doorlist.keycloak.dev.crt
 !**/doorlist.ca.dev.crt
-# Deny-By-Default: Negatives
-**/*.key
-**/*.pfx
-**/*.p12
-**/*.crt
-**/*.pem
-**/*.csr
+!dev.env

@@ -22,15 +22,6 @@ builder.Services.AddSwaggerGen(options =>
         In = ParameterLocation.Header,
         Description = "Paste a Keycloak access token obtained from POST /realms/doorlist/protocol/openid-connect/token"
     });
-    /*
-    options.AddSecurityRequirement(doc => new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecuritySchemeReference("Bearer", doc),
-            []
-        }
-    });
-    */
 });
 
 // Auth
@@ -77,13 +68,16 @@ builder.Services.AddCors(options =>
     });
 });
 
-// 
+// ----
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+} else if (app.Environment.IsProduction())
+{
+    // production key vault secrets here
 }
 
 app.UseHttpsRedirection();

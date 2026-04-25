@@ -1,4 +1,5 @@
 using Doorlist.Infrastructure.Security;
+using Npgsql;
 
 namespace Doorlist.Infrastructure;
 
@@ -16,14 +17,25 @@ public static class DependencyInjection
         IConfiguration configuration
         )
     {
-        // Database service
+        // Startup Services
+        services.AddHostedService<ConfigurationValidatorService>();
+        services.AddHostedService<PostQuantumStartupService>();
+        
+        // Setup DB
+        var db = configuration.GetSection("Databases:DoorlistAPI");
+        string? connectionString = new NpgsqlConnectionStringBuilder
+        {
+            Host = db.GetValue<string>("Host"),
+            Port = db.GetValue<int>("Port"),
+            Database = db.GetValue<string>("Database"),
+            Username = db.GetValue<string>("Username"),
+            Password = db.GetValue<string>("Password"),
+        }.ConnectionString; 
         services.AddDbContext<DoorlistDbContext>(options =>
             options.UseNpgsql(
-                configuration.GetConnectionString("Doorlist"),
+                connectionString,
                 npgsql => npgsql.MigrationsAssembly(typeof(DoorlistDbContext).Assembly.FullName)
             ));
-
-        services.AddHostedService<PostQuantumStartupService>();
         
         return services;
     }

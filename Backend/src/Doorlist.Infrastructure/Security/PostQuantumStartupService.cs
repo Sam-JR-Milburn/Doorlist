@@ -7,11 +7,9 @@ using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-/**
- * PostQuantumStartupService:
- * Checks OpenSSL (Kestrel default to it) for PQC availability and attempts to configure it
- * if the version matches. 
- */
+/// <summary>
+/// Checks OpenSSL (Kestrel default to it) for PQC availability and attempts to configure it if the version matches. 
+/// </summary>
 public class PostQuantumStartupService : IHostedService
 {
     private ILogger<PostQuantumStartupService> _logger;
@@ -199,5 +197,5 @@ public class PostQuantumStartupService : IHostedService
         _logger.LogInformation("PQC TLS enabled.");
     }
 
-    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+    public async Task StopAsync(CancellationToken cancellationToken) => await Task.CompletedTask;
 }

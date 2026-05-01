@@ -1,6 +1,8 @@
 services:
+  # --- Identity Database For Keycloak ---
   doorlist_keycloak_db:
     image: postgres:16
+    container_name: doorlist_keycloak_db
     env_file:
       - dev.env
     restart: unless-stopped
@@ -10,16 +12,44 @@ services:
       POSTGRES_PASSWORD: ${Doorlist_KC_DB_PASSWORD}
     ports:
       - "5433:5432"
+    volumes:
+      - doorlist_keycloak_db:/var/lib/postgresql/data
     networks:
       - doorlist_services
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U keycloakuser -d keycloak"]
+      test: ["CMD-SHELL", "pg_isready -U $${Doorlist_KC_DB_USER} -d keycloak"] # 
       interval: 5s
       timeout: 5s
       retries: 5
 
+  # --- Application Database For Doorlist Backend
+  doorlist_app_db:
+    image: postgres:16
+    container_name: doorlist_app_db
+    env_file:
+      - dev.env
+    environment:
+      POSTGRES_DB: doorlist_app
+      POSTGRES_USER: ${Doorlist_App_DB_USER}
+      POSTGRES_PASSWORD: ${Doorlist_App_DB_PASSWORD}
+      
+      # Feed the Infrastructure root to the API. 
+      # DOORLIST_INFRA_PATH: ${PWD} # WORK ON ME
+    ports:
+      - "5434:5432"
+    volumes:
+      - doorlist_app_db:/var/lib/postgresql/data
+    networks:
+      - doorlist_services
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${Doorlist_App_DB_USER} -d doorlist_app"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  
   doorlist_keycloak:
     image: keycloak/keycloak:26.1
+    container_name: doorlist_keycloak_server
     env_file:
       - dev.env
     command: start-dev --import-realm --features=dpop
@@ -55,6 +85,10 @@ services:
       - "8443:8443"
     networks:
       - doorlist_services
+
+volumes:
+  doorlist_keycloak_db:
+  doorlist_app_db:
 
 networks:
   doorlist_services:

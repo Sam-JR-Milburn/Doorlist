@@ -1,7 +1,6 @@
-using Doorlist.Domain.Utility;
-
 namespace Doorlist.Infrastructure.Security;
 
+using Doorlist.Domain.Utility;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;
@@ -54,7 +53,8 @@ public class ConfigurationValidatorService : IHostedService
             failures.Add(key);
             return false;
         }
-        if (!File.Exists(filePath))
+        var qualifiedPath = Path.GetFullPath(filePath);
+        if (!File.Exists(qualifiedPath))
         {
             _logger.LogError($"{description.Capitalise()} file not found: {filePath} ({key})");
             failures.Add(key);
@@ -63,12 +63,12 @@ public class ConfigurationValidatorService : IHostedService
         // Check the file can be opened for at-least reading.
         try
         {
-            using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read);
+            using var stream = File.Open(qualifiedPath, FileMode.Open, FileAccess.Read);
             return true;
         }
         catch (UnauthorizedAccessException uae)
         {
-            _logger.LogError($"{description.Capitalise()} file ({filePath}) unreadable by process: {uae.Message}");
+            _logger.LogError($"{description.Capitalise()} file ({qualifiedPath}) unreadable by process: {uae.Message}");
         }
         catch (Exception e)
         {

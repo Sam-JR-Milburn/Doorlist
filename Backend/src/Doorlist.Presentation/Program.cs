@@ -77,7 +77,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-// ----
+// Called after all the setup.
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

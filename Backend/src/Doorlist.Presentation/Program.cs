@@ -1,5 +1,6 @@
 using Doorlist.Application;
 using Doorlist.Infrastructure;
+using Doorlist.Presentation.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -39,7 +40,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     {
         options.MapInboundClaims = false;
         options.Authority = builder.Configuration["Keycloak:BaseUrl"] + "/realms/" + builder.Configuration["Keycloak:Realm"];
-        options.Audience = "account";
+        options.Audience = "doorlist-api";
         options.RequireHttpsMetadata = true;
         
         options.TokenValidationParameters = new TokenValidationParameters
@@ -47,7 +48,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuer = true,
             ValidIssuer = builder.Configuration["Keycloak:BaseUrl"] + "/realms/" + builder.Configuration["Keycloak:Realm"],
             ValidateAudience = true,
-            ValidAudience = "account",
+            ValidAudience = "doorlist-api",
             ValidateLifetime = true,
             RoleClaimType = "roles",
             NameClaimType = "preferred_username",
@@ -63,6 +64,8 @@ builder.Services.AddAuthorization(options =>
 // Services
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 // CORS
 builder.Services.AddCors(options =>
@@ -79,6 +82,7 @@ builder.Services.AddCors(options =>
 
 // Called after all the setup.
 var app = builder.Build();
+app.UseExceptionHandler(); // Configure the GlobalExceptionHandler
 
 if (app.Environment.IsDevelopment())
 {

@@ -15,10 +15,6 @@ public class User
     private readonly List<UserLogin> _logins = new();
     public IReadOnlyCollection<UserLogin> Logins => _logins;
     
-    // Serves as a username
-    public string Email { get; private set; }
-    public bool EmailVerified { get; private set; } = false;
-    
     public string FirstName { get; private set; }
     public string LastName { get; private set; }
     
@@ -26,15 +22,17 @@ public class User
     
     public string? ProfilePicturePath { get; private set; }
     
+    public bool Restricted { get; private set; }
+    
     public User() {} // EF Core
     
-    public User(Guid id, string email, string firstName, string lastName, DateTime dateOfBirth)
+    public User(Guid id, string firstName, string lastName, DateTime dateOfBirth)
     {
         Id = id;
-        Email = email;
         FirstName = firstName;
         LastName = lastName;
         DateOfBirth = dateOfBirth;
+        Restricted = false;
     }
     
     /// <summary>
@@ -89,12 +87,6 @@ public class User
         this.DateOfBirth = newDateOfBirth;
         return true;
     }
-
-    public bool SetEmailVerified()
-    {
-        EmailVerified = true;
-        return true;
-    }
     
     public bool SetProfilePicture(string profilePicturePath)
     {
@@ -102,6 +94,18 @@ public class User
         if (profilePicturePath == ProfilePicturePath) return true;
         
         this.ProfilePicturePath = profilePicturePath;
+        return true;
+    }
+
+    public bool RestrictUser()
+    {
+        Restricted = true;
+        return true;
+    }
+
+    public bool UnrestrictUser()
+    {
+        Restricted = false;
         return true;
     }
 }

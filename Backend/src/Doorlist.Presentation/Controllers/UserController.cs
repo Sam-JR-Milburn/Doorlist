@@ -1,9 +1,10 @@
 namespace Doorlist.Presentation.Controllers;
 
+using Application.User;
+using Application.User.DTOs;
+using Domain.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
-using Doorlist.Application.Common.DTOs.User;
 
 /// <summary>
 /// Users: configure user profiles and metadata.
@@ -14,29 +15,43 @@ using Doorlist.Application.Common.DTOs.User;
 public class UserController :  ControllerBase
 {
     private readonly ILogger<UserController> _logger;
-    public UserController(ILogger<UserController> logger)
+    private  readonly IUserService _userService;
+    public UserController(ILogger<UserController> logger, IUserService userService)
     {
         _logger = logger;
+        _userService = userService;
     }
 
+    /// <summary>
+    ///  Fully register a user with Keycloak.
+    /// </summary>
     [AllowAnonymous]
     [HttpPost]
-    [Route("RegisterUser")]
+    [Route("register-full")]
     [Consumes("multipart/form-data")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Register([FromForm] UserRegistrationDTO registrationData)
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> RegisterLocal([FromForm] FullUserRegistrationDto registrationData)
     {
-        // Check for ISO 8601 YYYY-MM-DD
-        if (!DateTime.TryParse(registrationData.DateOfBirth, out var dateOfBirth))
+        var result = await _userService.RegisterLocalAsync(registrationData);
+        if (result.IsSuccess)
         {
-            return BadRequest("Invalid date format.");
+            var resultData = result.Value;
+            return Ok(registrationData); // 
         }
-        
-        // Check if the user exists by their email.
-        
-        // ----
-        
-        return Ok();
+
+        switch (result.ErrorType)
+        {
+            case ErrorType.Validation:
+                return BadRequest(result.ErrorMessage); // Date parsing issues
+            case ErrorType.Conflict:
+                return Conflict(result.ErrorMessage); // If the email already exists
+            default:
+                return BadRequest(result.ErrorMessage);
+        }
     }
+    
+    // Below: Partial registration for
+    // public async Task<IActionResult> RegisterExternal
 }

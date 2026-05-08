@@ -9,7 +9,7 @@ public class UserLogin
     
     // 'Google', 'GitHub', 'Microsoft'
     public string ProviderName { get; private set; }
-    public string ProviderKey { get; private set; } // Identifyer: sub in the token
+    public string ProviderKey { get; private set; } // Identifier: sub in the token
     
     // Specific tenant within the provider context. eg. joe@outlook.com is not joe@microsoft_tenanted_corporation.org
     public string Issuer { get; private set; }

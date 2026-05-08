@@ -22,8 +22,4 @@
     <ProjectReference Include="..\Doorlist.Infrastructure\Doorlist.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Middleware\" />
-  </ItemGroup>
-
 </Project>

@@ -1,9 +1,9 @@
-namespace Doorlist.Application.Common.DTOs.User;
+namespace Doorlist.Application.User.DTOs;
 
 using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 
-public class UserRegistrationDTO
+public class FullUserRegistrationDto
 {
     [Required]
     [EmailAddress]

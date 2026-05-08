@@ -15,9 +15,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.ToTable("users");
         
         builder.HasKey(x => x.Id);
-        
-        builder.Property(x => x.Email).IsRequired().HasMaxLength(256);
-        builder.HasIndex(x => x.Email).IsUnique();
 
         builder.Property(x => x.DateOfBirth)
             .HasColumnType("date")

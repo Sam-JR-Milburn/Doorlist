@@ -1,5 +1,6 @@
 namespace Doorlist.Infrastructure;
 
+using Domain.Interfaces.User;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Doorlist.Infrastructure.Security;
 using Doorlist.Infrastructure.Persistence;
 using Npgsql;
+using Persistence.Repositories;
 
 public static class DependencyInjection
 {
@@ -88,6 +90,10 @@ public static class DependencyInjection
                 connectionString,
                 npgsql => npgsql.MigrationsAssembly(typeof(DoorlistDbContext).Assembly.FullName)
             ));
+        
+        // Infrastructure persistence
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUserLoginRepository, UserLoginRepository>();
         
         return services;
     }

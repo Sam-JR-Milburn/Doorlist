@@ -34,11 +34,11 @@ public class UserController :  ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> RegisterLocal([FromForm] FullUserRegistrationDto registrationData)
     {
-        var result = await _userService.RegisterLocalAsync(registrationData);
+        Result<UserRegistrationResponseDto> result = await _userService.RegisterLocalAsync(registrationData, CancellationToken.None);
         if (result.IsSuccess)
         {
-            var resultData = result.Value;
-            return Ok(registrationData); // 
+            UserRegistrationResponseDto? resultData = result.Value;
+            return Ok(resultData); 
         }
 
         switch (result.ErrorType)
@@ -47,6 +47,8 @@ public class UserController :  ControllerBase
                 return BadRequest(result.ErrorMessage); // Date parsing issues
             case ErrorType.Conflict:
                 return Conflict(result.ErrorMessage); // If the email already exists
+            case ErrorType.DependencyFailure:
+                return StatusCode(503, result.ErrorMessage); // Service Unavailable, if either Keycloak or the DB repos are down.
             default:
                 return BadRequest(result.ErrorMessage);
         }

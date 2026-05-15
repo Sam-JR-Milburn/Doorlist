@@ -14,7 +14,10 @@ public class UserLoginConfiguration : IEntityTypeConfiguration<UserLogin>
     {
         builder.ToTable("user_logins");
         
-        builder.HasKey("UserId", "ProviderName", "ProviderKey");
+        // Each user can use one Microsoft account, one Google account, one Keycloak account, etc. 
+        builder.HasKey(x => new { x.UserId, x.ProviderName });
+
+        builder.Property(x => x.UserId).IsRequired(); // FK to Users.
 
         builder.Property(x => x.ProviderName)
             .IsRequired()

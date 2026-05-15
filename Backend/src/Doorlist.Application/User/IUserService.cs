@@ -5,5 +5,5 @@ using DTOs;
 
 public interface IUserService
 {
-    public Task<Result<UserRegistrationResponseDto>> RegisterLocalAsync(FullUserRegistrationDto registrationData);
+    public Task<Result<UserRegistrationResponseDto>> RegisterLocalAsync(FullUserRegistrationDto registrationData, CancellationToken cancellationToken);
 }

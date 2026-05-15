@@ -5,7 +5,7 @@ namespace Doorlist.Domain.Entities;
 /// </summary>
 public class UserLogin
 {
-    // Shadow property for the UserId
+    public Guid UserId { get; private set; }
     
     // 'Google', 'GitHub', 'Microsoft'
     public string ProviderName { get; private set; }
@@ -15,8 +15,9 @@ public class UserLogin
     public string Issuer { get; private set; }
     
     public UserLogin() {}
-    public UserLogin(string providerName, string providerKey, string issuer)
+    public UserLogin(Guid userId, string providerName, string providerKey, string issuer)
     {
+        UserId = userId;
         ProviderName = providerName;
         ProviderKey = providerKey;
         Issuer = issuer;

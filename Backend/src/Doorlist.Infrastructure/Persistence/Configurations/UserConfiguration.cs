@@ -26,7 +26,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         // Ensure UserLogin cascades the delete on User deletion
         builder.HasMany(x => x.Logins)
             .WithOne()
-            .HasForeignKey("UserId")
+            .HasForeignKey(x => x.UserId)
             .IsRequired() // Login can't exist without a user
             .OnDelete(DeleteBehavior.Cascade);
         

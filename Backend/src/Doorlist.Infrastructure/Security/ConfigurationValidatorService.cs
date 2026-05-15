@@ -107,8 +107,9 @@ public class ConfigurationValidatorService : IHostedService
         List<string> failures = new List<string>();
         
         // Auth
-        ValidateRequired("Keycloak:ClientSecret", failures);
+        ValidateRequired("Keycloak:Admin:ClientSecret", failures);
         ValidateRequired("Kestrel:Endpoints:Https:Certificate:Password", failures);
+        ValidateRequired("Databases:DoorlistAPI:Username", failures);
         ValidateRequired("Databases:DoorlistAPI:Password", failures);
         
         // Files

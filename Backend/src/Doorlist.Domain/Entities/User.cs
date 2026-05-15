@@ -26,9 +26,9 @@ public class User
     
     public User() {} // EF Core
     
-    public User(Guid id, string firstName, string lastName, DateTime dateOfBirth)
+    public User(string firstName, string lastName, DateTime dateOfBirth)
     {
-        Id = id;
+        Id = Guid.CreateVersion7(); // Enforce UUIDv7
         FirstName = firstName;
         LastName = lastName;
         DateOfBirth = dateOfBirth;
@@ -39,15 +39,28 @@ public class User
     /// Link an external auth provider to this identity. 
     /// </summary>
     /// <exception cref="IdentityAlreadyLinkedException">This throws if the user already has an identity linked against a provider and issuer</exception>
-    public bool LinkIdentity(string providerName, string providerKey, string issuer)
+    public bool LinkIdentity(string provider, string key, string issuer)
     {
-        if (string.IsNullOrWhiteSpace(providerName) || string.IsNullOrWhiteSpace(providerKey)) return false; 
+        UserLogin userLogin = new UserLogin(Id, provider, key, issuer);
+        if (string.IsNullOrWhiteSpace(userLogin.ProviderName) || string.IsNullOrWhiteSpace(userLogin.ProviderKey)) return false; 
         
-        if (!_logins.Any(x => x.ProviderName == providerName && x.Issuer ==  issuer))
+        // UserId check is implicit without the check, but this shows intent.
+        if (_logins.Any(x => x.UserId == userLogin.UserId && x.ProviderName == userLogin.ProviderName))
         {
-            throw new IdentityAlreadyLinkedException($"Already a matching provider (${providerName}) and issuer (${issuer}) pair for user ${Id}");
+            throw new IdentityAlreadyLinkedException($"Already a matching provider (${userLogin.ProviderName}) for user ${Id}");
         }
-        _logins.Add(new UserLogin(providerName, providerKey, issuer));
+        _logins.Add(new UserLogin(this.Id, userLogin.ProviderName, userLogin.ProviderKey, userLogin.Issuer));
+        return true;
+    }
+    
+    /// <summary>
+    /// Get rid of a linked UserLogin identity.
+    /// </summary>
+    public bool UnlinkIdentity(string providerName)
+    {
+        if (string.IsNullOrWhiteSpace(providerName)) return false;
+        // UserId check is implicit without the check, but this shows intent.
+        _logins.RemoveAll(x => x.UserId == this.Id && x.ProviderName == providerName);
         return true;
     }
 

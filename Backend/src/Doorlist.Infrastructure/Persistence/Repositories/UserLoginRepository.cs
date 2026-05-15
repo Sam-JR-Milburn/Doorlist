@@ -15,15 +15,20 @@ public class UserLoginRepository : IUserLoginRepository
     {
         _doorlistDbContext = doorlistDbContext;
     }
-    
+
     /// <summary>
-    /// Check all emails (ProviderKey/'subject'), check if it exists
+    /// Save UserLogin to the DB.
     /// </summary>
-    /// <param name="email"></param>
-    /// <returns></returns>
-    public async Task<bool> CheckUserExistsByEmailAsync(string email)
+    public async Task CreateUserLoginAsync(UserLogin userLogin)
     {
-        return await _doorlistDbContext.UserLogins.AnyAsync(x => x.ProviderKey == email);
+        await _doorlistDbContext.UserLogins.AddAsync(userLogin);
     }
-    
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public async Task RemoveUserLoginAsync(UserLogin userLogin)
+    {
+        _doorlistDbContext.UserLogins.Remove(userLogin);
+    }
 }

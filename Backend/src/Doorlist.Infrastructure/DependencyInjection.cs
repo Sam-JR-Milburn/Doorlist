@@ -1,12 +1,20 @@
 namespace Doorlist.Infrastructure;
 
-using Domain.Interfaces.User;
+using Application;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
-using Microsoft.EntityFrameworkCore;
+
+
+using Doorlist.Application.Identity;
+using Keycloak.AuthServices.Sdk;
+using Doorlist.Infrastructure.Identity;
 
 using Doorlist.Infrastructure.Security;
 using Doorlist.Infrastructure.Persistence;
+
+using Domain.Interfaces.User;
+using Identity.Options;
 using Npgsql;
 using Persistence.Repositories;
 
@@ -92,8 +100,22 @@ public static class DependencyInjection
             ));
         
         // Infrastructure persistence
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserLoginRepository, UserLoginRepository>();
+        
+        // Register the Keycloak client connector
+        services.AddKeycloakAdminHttpClient(options =>
+            {
+                options.AuthServerUrl = configuration.GetValue<string>("Keycloak:BaseUrl");
+                options.Realm = configuration.GetValue<string>("Keycloak:Realm")!;
+                options.Resource = configuration.GetValue<string>("Keycloak:Resource")!;
+                options.SslRequired = configuration.GetValue<string>("Keycloak:VerifySsl")!;
+            }
+        );
+        services.Configure<KeycloakAdminClientOptions>(configuration.GetSection(KeycloakAdminSettings.SectionName));
+        services.AddScoped<IIdentityProvisionerService, KeycloakProvisionerService>();
         
         return services;
     }

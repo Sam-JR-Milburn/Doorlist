@@ -1,7 +1,9 @@
 using Doorlist.Application;
 using Doorlist.Infrastructure;
+using Doorlist.Infrastructure.Persistence;
 using Doorlist.Presentation.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 
@@ -88,6 +90,34 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    
+    // Apply migrations
+    using var scope = app.Services.CreateScope();
+    var services = scope.ServiceProvider;
+
+    try
+    {
+        var context = services.GetRequiredService<DoorlistDbContext>();
+        var pendingMigrations = (await context.Database.GetPendingMigrationsAsync()).ToList();
+        if (pendingMigrations.Any())
+        {
+            Console.WriteLine($"Infrastructure migrations - found {pendingMigrations.Count()} pending migrations. Applying... ");
+            await context.Database.MigrateAsync();
+            Console.WriteLine("Infrastructure database migrated successfully.");
+        }
+        else
+        {
+            Console.WriteLine("Infrastructure database is up to date.");
+        }
+        
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogCritical(ex, "An error occurred while migrating the database.");
+        throw; // Crash in dev.
+    }
+    
 } else if (app.Environment.IsProduction())
 {
     // production key vault secrets here

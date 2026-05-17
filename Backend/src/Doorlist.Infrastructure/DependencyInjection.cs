@@ -14,7 +14,13 @@ using Doorlist.Infrastructure.Security;
 using Doorlist.Infrastructure.Persistence;
 
 using Domain.Interfaces.User;
+using Duende.AccessTokenManagement;
 using Identity.Options;
+using Keycloak.AuthServices.Authorization;
+using Keycloak.AuthServices.Common;
+using Keycloak.AuthServices.Sdk.Admin;
+using Keycloak.AuthServices.Sdk.Protection;
+using Microsoft.Extensions.Http.Logging;
 using Npgsql;
 using Persistence.Repositories;
 
@@ -99,22 +105,43 @@ public static class DependencyInjection
                 npgsql => npgsql.MigrationsAssembly(typeof(DoorlistDbContext).Assembly.FullName)
             ));
         
-        // Infrastructure persistence
+        // Infrastructure Entity persistence
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserLoginRepository, UserLoginRepository>();
         
-        // Register the Keycloak client connector
-        services.AddKeycloakAdminHttpClient(options =>
-            {
-                options.AuthServerUrl = configuration.GetValue<string>("Keycloak:BaseUrl");
-                options.Realm = configuration.GetValue<string>("Keycloak:Realm")!;
-                options.Resource = configuration.GetValue<string>("Keycloak:Resource")!;
-                options.SslRequired = configuration.GetValue<string>("Keycloak:VerifySsl")!;
-            }
-        );
-        services.Configure<KeycloakAdminClientOptions>(configuration.GetSection(KeycloakAdminSettings.SectionName));
+        // Keycloak: Register the realm details for DI.
+        var keycloakSection = configuration.GetSection("Keycloak");
+        services.Configure<KeycloakSettings>(keycloakSection);
+        var keycloakSettings = keycloakSection.Get<KeycloakSettings>() ?? throw new InvalidOperationException("Could not bind KeycloakSettings configuration section.");
+        
+        // Keycloak: Establish handlers for incoming authentication
+        services.AddAuthorization().AddKeycloakAuthorization();
+        
+        // Keycloak: Use the Duende OpenID Connect library token management
+        services.AddDistributedMemoryCache();
+        services.AddClientCredentialsTokenManagement().AddClient("keycloak.admin.token", client =>
+        {
+            client.TokenEndpoint    = new Uri($"{keycloakSettings.AuthServerUrl}/realms/{keycloakSettings.Realm}/protocol/openid-connect/token");
+            client.ClientId         = ClientId.Parse(keycloakSettings.Resource); 
+            client.ClientSecret     = ClientSecret.Parse(keycloakSettings.Secret);
+        });
+        
+        // Keycloak: Configure the outbound admin client
+        services.AddKeycloakAdminHttpClient(options => 
+            { 
+                options.AuthServerUrl       = keycloakSettings.AuthServerUrl;
+                options.Realm               = keycloakSettings.Realm;
+                options.Resource            = keycloakSettings.Resource;
+                options.SslRequired         = keycloakSettings.SslRequired;
+                options.Credentials         = new KeycloakClientInstallationCredentials
+                {
+                    Secret  = keycloakSettings.Secret,
+                };
+            })
+        .AddClientCredentialsTokenHandler(ClientCredentialsClientName.Parse("keycloak.admin.token"));
+        
         services.AddScoped<IIdentityProvisionerService, KeycloakProvisionerService>();
         
         return services;

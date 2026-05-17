@@ -4,6 +4,7 @@ using Doorlist.Infrastructure.Persistence;
 using Doorlist.Presentation.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 
@@ -23,7 +24,7 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Paste a Keycloak access token obtained from POST /realms/doorlist/protocol/openid-connect/token"
+        Description = "Paste a Keycloak access token obtained from POST /realms/doorlist/protocol/openid-connect/token",
     });
     
     // UI Option
@@ -40,20 +41,38 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        // Check for the auth server and realm, don't build into an invalid state 
+        var authServerUrl = builder.Configuration["Keycloak:AuthServerUrl"]?.TrimEnd('/');
+        var realm = builder.Configuration["Keycloak:Realm"];
+        if (string.IsNullOrEmpty(authServerUrl) || string.IsNullOrEmpty(realm))
+        {
+            throw new InvalidConfigurationException("Couldn't locate either Keycloak:AuthServerUrl or Keycloak:Realm in the config");
+        }
+        
         options.MapInboundClaims = false;
-        options.Authority = builder.Configuration["Keycloak:BaseUrl"] + "/realms/" + builder.Configuration["Keycloak:Realm"];
+        options.Authority = authServerUrl + "/realms/" + realm;
         options.Audience = "doorlist-api";
         options.RequireHttpsMetadata = true;
         
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["Keycloak:BaseUrl"] + "/realms/" + builder.Configuration["Keycloak:Realm"],
             ValidateAudience = true,
             ValidAudience = "doorlist-api",
             ValidateLifetime = true,
+            
             RoleClaimType = "roles",
             NameClaimType = "preferred_username",
+            
+            ValidateIssuer = true,
+            ValidIssuers = new[]
+            {
+                $"{authServerUrl}/realms/{realm}",
+                $"{authServerUrl}/realms/{realm}/",
+                
+                // Fallback:running inside the Keycloak container
+                $"https://doorlist_keycloak_server:8443/realms/{realm}",
+                $"https://doorlist_keycloak_server:8443/realms/{realm}/"
+            }
         };
     });
 
@@ -74,8 +93,18 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("DoorlistFrontend", policy =>
     {
+        var allowedOrigins = new List<string>
+        {
+            builder.Configuration["Frontend:BaseUrl"] ?? "http://localhost:5173"
+        };
+
+        if (builder.Environment.IsDevelopment())
+        {
+            allowedOrigins.Add("null"); // null: Allow file:// access for debugging 
+        }
+        
         policy
-            .WithOrigins(builder.Configuration["Frontend:BaseUrl"] ?? "http://localhost:5173")
+            .WithOrigins(allowedOrigins.ToArray())
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials(); // required for SignalR
@@ -91,7 +120,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
     
-    // Apply migrations
+    // Apply migrations if they exist.
     using var scope = app.Services.CreateScope();
     var services = scope.ServiceProvider;
 

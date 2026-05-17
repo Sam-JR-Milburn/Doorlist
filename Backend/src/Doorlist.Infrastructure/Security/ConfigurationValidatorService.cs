@@ -107,7 +107,7 @@ public class ConfigurationValidatorService : IHostedService
         List<string> failures = new List<string>();
         
         // Auth
-        ValidateRequired("Keycloak:Admin:ClientSecret", failures);
+        ValidateRequired("Keycloak:credentials:secret", failures);
         ValidateRequired("Kestrel:Endpoints:Https:Certificate:Password", failures);
         ValidateRequired("Databases:DoorlistAPI:Username", failures);
         ValidateRequired("Databases:DoorlistAPI:Password", failures);
@@ -117,7 +117,7 @@ public class ConfigurationValidatorService : IHostedService
         ValidateFile("OpenSSL:ConfigPath", "OpenSSL config for PQC TLS", failures);
         
         // URLs
-        ValidateHttpUrl("Keycloak:BaseUrl", failures);
+        ValidateHttpUrl("Keycloak:AuthServerUrl", failures);
         ValidateHttpUrl("Frontend:BaseUrl", failures);
         ValidateHttpUrl("Kestrel:Endpoints:Http:Url", failures);
         ValidateHttpUrl("Kestrel:Endpoints:Https:Url", failures);

@@ -17,19 +17,19 @@ public class KeycloakProvisionerService : IIdentityProvisionerService
 {
     private readonly ILogger<KeycloakProvisionerService> _logger;
     private readonly IKeycloakUserClient _keycloakUserClient;
-    private readonly KeycloakAdminSettings _keycloakAdminSettings;
+    private readonly KeycloakSettings _keycloakSettings;
 
     public string ProviderName => "Keycloak";
-    public string Issuer => _keycloakAdminSettings.Admin.Issuer;
+    public string Issuer => _keycloakSettings.Issuer;
 
     public KeycloakProvisionerService(
         ILogger<KeycloakProvisionerService> logger, 
         IKeycloakUserClient keycloakUserClient, 
-        IOptions<KeycloakAdminSettings> options)
+        IOptions<KeycloakSettings> keycloakSettingsOptions)
     {
         _logger = logger;
         _keycloakUserClient = keycloakUserClient;
-        _keycloakAdminSettings = options.Value;
+        _keycloakSettings = keycloakSettingsOptions.Value;
     }
     
     /// <summary>
@@ -43,9 +43,7 @@ public class KeycloakProvisionerService : IIdentityProvisionerService
             Email = email,
             Username = email,
             Enabled = true,
-            Credentials = new List<CredentialRepresentation> {
-                new CredentialRepresentation { Type = "password", Value = password, Temporary = false}
-            },
+            Credentials = [ new CredentialRepresentation() { Type = "password", Value = password, Temporary = false } ],
             Attributes = new Dictionary<string, ICollection<string>>
             {
                 { "doorlist_user_id", new List<string>(){ doorlistUserId.ToString() } } // Store the GUID in Keycloak.
@@ -55,7 +53,12 @@ public class KeycloakProvisionerService : IIdentityProvisionerService
         // Attempt registration with Keycloak.
         try
         {
-            var kcResponse = await _keycloakUserClient.CreateUserWithResponseAsync(_keycloakAdminSettings.Realm, userRepresentation, cancellationToken);
+            var kcResponse = await _keycloakUserClient.CreateUserWithResponseAsync(_keycloakSettings.Realm, userRepresentation, cancellationToken);
+            if (kcResponse.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+                _logger.LogWarning("Keycloak rejected user creation for {Email} - already exists", email);
+                return Result<string>.Failure("A user with this email already exists", ErrorType.Conflict);
+            }
             if (!kcResponse.IsSuccessStatusCode)
             {
                 _logger.LogError("Keycloak rejected user creation - HTTP: {Code}, Request Message: {RequestMessage}, Response Message: {ResponseMessage}", 
@@ -85,7 +88,7 @@ public class KeycloakProvisionerService : IIdentityProvisionerService
     {
         try
         {
-            var response = await _keycloakUserClient.DeleteUserWithResponseAsync(_keycloakAdminSettings.Realm, externalId, cancellationToken);
+            var response = await _keycloakUserClient.DeleteUserWithResponseAsync(_keycloakSettings.Realm, externalId, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogError("Failed to delete Keycloak user {Sub} with code [{StatusCode}]", externalId, response.StatusCode);

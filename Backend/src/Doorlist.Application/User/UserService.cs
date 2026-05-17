@@ -7,6 +7,7 @@ using Domain.Interfaces.User;
 using Domain.Utility;
 using DTOs;
 using Identity;
+using Microsoft.AspNetCore.Mvc;
 
 public class UserService : IUserService
 {

@@ -1,0 +1,93 @@
+<form id="registrationForm" enctype="multipart/form-data">
+    <input type="text" name="firstName" placeholder="First Name" required /><br/>
+    <input type="text" name="lastName" placeholder="Last Name" required /><br/>
+    <input type="email" name="email" placeholder="Email" required /><br/>
+    <input type="password" name="password" placeholder="Password" required /><br/>
+    <input type="date" name="dateOfBirth" required /><br/>
+    <input type="file" name="profilePicture" /><br/>
+    <button type="submit">Register Account</button>
+</form>
+
+<hr />
+<h3>Response Output:</h3>
+<pre id="output">No response yet...</pre>
+
+<script>
+    document.getElementById('registrationForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const output = document.getElementById('output');
+        const formData = new FormData(e.target);
+
+        try {
+            const response = await fetch("https://localhost:5001/user/register-full", {
+                method: "POST",
+                body: formData
+            });
+
+            // Check if it's actually JSON
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+                const result = await response.json();
+                console.log("Success:", result);
+                output.textContent = JSON.stringify(result, null, 2);
+            } else {
+                const text = await response.text();
+                console.error("Server Error (Non-JSON):", text);
+                output.textContent = "503 Error: " + text;
+            }
+            
+            console.log("Registration Result:", result);
+        } catch (err) {
+            output.textContent = "Error: " + err.message;
+        }
+    };
+</script>
+
+<!-- -->
+<button id="loginBtn">Login with Keycloak (PKCE)</button>
+
+<script>
+    // 1. Generate random string for Verifier
+    function generateRandomString(length) {
+        const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+        let result = '';
+        const values = new Uint32Array(length);
+        crypto.getRandomValues(values);
+        for (let i = 0; i < length; i++) {
+            result += charset[values[i] % charset.length];
+        }
+        return result;
+    }
+
+    // 2. SHA-256 hash the verifier and base64url encode it for the Challenge
+    async function generateCodeChallenge(verifier) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(verifier);
+        const digest = await crypto.subtle.digest('SHA-256', data);
+        return btoa(String.fromCharCode(...new Uint8Array(digest)))
+            .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+
+    document.getElementById('loginBtn').onclick = async () => {
+        const verifier = generateRandomString(128);
+        const challenge = await generateCodeChallenge(verifier);
+
+        // Store verifier locally to use later during the /token swap
+        sessionStorage.setItem("pkce_verifier", verifier);
+
+        const realm = "doorlist";
+        const clientId = "doorlist-frontend"; // From your realm export
+        const redirectUri = "google.com"
+
+        const authUrl = `https://localhost:8443/realms/${realm}/protocol/openid-connect/auth` +
+            `?client_id=${encodeURIComponent(clientId)}` +
+            `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+            `&response_type=code` +
+            `&scope=openid profile email` +
+            `&code_challenge=${challenge}` +
+            `&code_challenge_method=S256`;
+
+        // Redirect to Keycloak
+        window.location.href = authUrl;
+    };
+</script>

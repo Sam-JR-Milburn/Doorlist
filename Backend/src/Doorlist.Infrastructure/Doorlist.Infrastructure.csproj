@@ -5,6 +5,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Duende.AccessTokenManagement.OpenIdConnect" Version="4.2.0" />
+    <PackageReference Include="Keycloak.AuthServices.Authentication" Version="3.0.0" />
+    <PackageReference Include="Keycloak.AuthServices.Authorization" Version="3.0.0" />
     <PackageReference Include="Keycloak.AuthServices.Sdk" Version="3.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.5" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.5" />

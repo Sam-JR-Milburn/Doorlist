@@ -1,5 +1,6 @@
 namespace Doorlist.Presentation.Controllers;
 
+using System.Security.Claims;
 using Application.User;
 using Application.User.DTOs;
 using Domain.Utility;
@@ -53,6 +54,8 @@ public class UserController :  ControllerBase
                 return BadRequest(result.ErrorMessage);
         }
     }
+    
+    
     
     // Below: Partial registration for
     // public async Task<IActionResult> RegisterExternal

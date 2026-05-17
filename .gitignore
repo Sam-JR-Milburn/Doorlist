@@ -1,9 +1,3 @@
-# Exclude production HTTPS certs, realm config
-Infrastructure/Keycloak/realm-export.keycloak.prod.json
-Infrastructure/certs/doorlist.backend.prod.pfx
-Infrastructure/certs/doorlist.keycloak.prod.crt
-Infrastructure/certs/doorlist.keycloak.prod.key
-
 # Rider and WebStorm IDE artifacts
 .idea
 Backend/.idea

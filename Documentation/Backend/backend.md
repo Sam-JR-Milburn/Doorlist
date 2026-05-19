@@ -60,6 +60,80 @@ public interface IIdentityProvisionerService
 }
 ```
 
+#### Outbound Keycloak Admin Client
+
+I've conformed my appsettings config to align with the formal schema expected by the Keycloak SDK library.  
+
+```
+"Keycloak": {
+    "AuthServerUrl": "https://localhost:8443",
+    "Realm": "doorlist",
+    "VerifySsl": "false",
+    "Resource": "doorlist-api",
+    "credentials": {}
+  },
+```
+
+This is ingested by a KeycloakSettings class that I can use at infrastructure DI runtime to configure the admin client and to build the KeycloakProvisionerService. 
+```C#
+namespace Doorlist.Infrastructure.Identity.Options;
+
+using System.Collections;
+using System.Reflection;
+using System.Text;
+
+/// <summary>
+/// Maps the settings from the Keycloak config.
+/// </summary>
+public class KeycloakSettings
+{
+    public const string SectionName = "Keycloak";
+    
+    public string AuthServerUrl { get; set; } = string.Empty;
+    public string Realm { get; set; } = string.Empty;
+    
+    public string SslRequired { get; set; } = string.Empty;
+    public bool VerifySsl { get; set; }
+    public string Resource { get; set; } = string.Empty;
+    
+    public Dictionary<string, string> Credentials { get; set; } = []; 
+    public string Issuer => $"{AuthServerUrl.TrimEnd('/')}/realms/{Realm}";
+
+    public string Secret => Credentials.TryGetValue("secret", out var secret) ? secret : string.Empty;
+    
+    //...
+}
+```
+
+This design means I can dynamically reconfigure the admin client if the realm details change - the client or realm name, or the issuer - which will change between production and development.
+
+You'll notice in the following snippet an implementation of an OAuth 2.0 Client Credentials Grant system. 
+
+```C#
+// Keycloak: Use the Duende OpenID Connect library for token management
+services.AddDistributedMemoryCache();
+services.AddClientCredentialsTokenManagement().AddClient("keycloak.admin.token", client =>
+{
+    client.TokenEndpoint    = new Uri($"{keycloakSettings.AuthServerUrl}/realms/{keycloakSettings.Realm}/protocol/openid-connect/token");
+    client.ClientId         = ClientId.Parse(keycloakSettings.Resource); 
+    client.ClientSecret     = ClientSecret.Parse(keycloakSettings.Secret);
+});
+
+// Keycloak: Configure the outbound admin client
+services.AddKeycloakAdminHttpClient(options => /* ... */)
+.AddClientCredentialsTokenHandler(ClientCredentialsClientName.Parse("keycloak.admin.token"));
+```
+
+I've configured the Duende.AccessTokenManagement library to act as an HTTP middleware interceptor for outbound requests to the Keycloak API. 
+This injects an 'Authorization: Bearer' header with the fresh access token for the admin client alone.
+
+Notably, the distributed memory cache is configured to store a valid Keycloak 'doorlist-api' access JWT, and Duende will refresh that token if the delegating handler reads that the access JWT is expired or revoked.
+
+
+
+<br />
+<br />
+
 ### Security-first Development
 
 #### Certs, Keys and Secrets
@@ -99,6 +173,8 @@ You'll notice in the [appsettings.Development.json](../../Backend/src/Doorlist.P
 In development mode, these are dotnet user-secrets local to the Presentation layer and available at runtime. 
 In production, it's intended to be via Azure Key Vault, or some other solution. 
 
+Note: in the infrastructure DI class you'll read that path names are normalised with respect to the project. 
+
 #### Security Frameworks
 
 By using OAuth2.0 JWTs from known providers, I can enforce time-limited and resource-limited application access using peer-reviewed standards and implementations.
@@ -110,12 +186,13 @@ It isn't implemented yet, but I'm planning to.
 
 When I do, I'll need to write a DPoP middleware pipeline carefully and to-spec against the RFC which will at least be a fun exercise. I'll try to test the implementation robustly for correctness.
 
-I'll write a DPoP middleware and configure it to be used alongside methods labelled [Authorize].
-
 Another item that I'm interested in implementing is a memory-cache (likely Redis) to blacklist a JWT token by it's nonce and enforce non-access without a database policy read (eg. Casbin). 
 
 This is supposed to deal with when someone abuses account access, enforcing an immediate ban against a JWT that in-principle provides account access for up to an hour.
 It's an especially valuable pattern in a federated system, which is an area I'm interested in. 
+
+<br />
+<br />
 
 ### High-Concurrency and Inventory Contention
 
@@ -123,3 +200,16 @@ While I haven't built the actual application logic around ticketing yet, the rai
 
 I'll be grappling with questions of pessimistic or optimistic locking, and the implementation of background services to prevent tickets from being scalped. 
 
+<br />
+<br />
+
+### Startup Services
+
+TODO: Discuss PQC and Configuration Validator startup services
+
+<br />
+<br />
+
+### Transaction Discipline
+
+TODO: Discuss how the user registration process preserves entity lifecycle appropriately with two dissimilar infrastructure services - the DB context and the Keycloak service.  

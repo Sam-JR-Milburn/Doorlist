@@ -5,6 +5,7 @@ using Application.User;
 using Application.User.DTOs;
 using Domain.Utility;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 /// <summary>
@@ -12,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 /// Keycloak handles AuthN and AuthZ. 
 /// </summary>
 [ApiController]
-[Route("[controller]")]
+[Route("/api/[controller]")]
 public class UserController :  ControllerBase
 {
     private readonly ILogger<UserController> _logger;
@@ -28,12 +29,13 @@ public class UserController :  ControllerBase
     /// </summary>
     [AllowAnonymous]
     [HttpPost]
-    [Route("register-full")]
+    [Route("registerUserInternal")]
     [Consumes("multipart/form-data")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> RegisterLocal([FromForm] FullUserRegistrationDto registrationData)
+    [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
+    public async Task<IActionResult> RegisterUserInternal([FromForm] FullUserRegistrationDto registrationData)
     {
         Result<UserRegistrationResponseDto> result = await _userService.RegisterLocalAsync(registrationData, CancellationToken.None);
         if (result.IsSuccess)
@@ -55,8 +57,15 @@ public class UserController :  ControllerBase
         }
     }
     
-    
-    
-    // Below: Partial registration for
-    // public async Task<IActionResult> RegisterExternal
+    /// <summary>
+    /// Register a user against external auth.
+    /// The feature is on pause for now, pre domain-name.
+    /// </summary>
+    [AllowAnonymous]
+    [HttpPost]
+    [Route("registerUserExternal")]
+    public async Task<IActionResult> RegisterUserExternal()
+    {
+        return StatusCode(500, "Not Implemented");
+    }
 }

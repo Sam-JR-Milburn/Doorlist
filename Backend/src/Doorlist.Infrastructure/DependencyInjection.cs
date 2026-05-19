@@ -119,7 +119,7 @@ public static class DependencyInjection
         // Keycloak: Establish handlers for incoming authentication
         services.AddAuthorization().AddKeycloakAuthorization();
         
-        // Keycloak: Use the Duende OpenID Connect library token management
+        // Keycloak: Use the Duende OpenID Connect library for token management
         services.AddDistributedMemoryCache();
         services.AddClientCredentialsTokenManagement().AddClient("keycloak.admin.token", client =>
         {

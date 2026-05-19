@@ -41,7 +41,6 @@ public class UserService : IUserService
             _logger.LogError(ex, "Failed to rollback user {UserId} after registration failure.", userId);
         }
     }
-
     
     public async Task<Result<UserRegistrationResponseDto>> RegisterLocalAsync(FullUserRegistrationDto registrationData, CancellationToken cancellationToken)
     {

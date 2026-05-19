@@ -1,148 +1,35 @@
 namespace Doorlist.Infrastructure;
 
-using Application;
-using Microsoft.EntityFrameworkCore;
+using DependencyInjectionExtensions;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 
-
-using Doorlist.Application.Identity;
-using Keycloak.AuthServices.Sdk;
-using Doorlist.Infrastructure.Identity;
-
+using Doorlist.Application;
 using Doorlist.Infrastructure.Security;
-using Doorlist.Infrastructure.Persistence;
-
-using Domain.Interfaces.User;
-using Duende.AccessTokenManagement;
-using Identity.Options;
-using Keycloak.AuthServices.Authorization;
-using Keycloak.AuthServices.Common;
-using Keycloak.AuthServices.Sdk.Admin;
-using Keycloak.AuthServices.Sdk.Protection;
-using Microsoft.Extensions.Http.Logging;
-using Npgsql;
-using Persistence.Repositories;
 
 public static class DependencyInjection
 {
     /// <summary>
-    /// Find the backend root path, containing 'Doorlist.slnx'.
+    /// Setup the Infra layer 
     /// </summary>
-    /// <exception cref="DirectoryNotFoundException">If the backend root path cannot be found.</exception>
-    private static string GetBackendRootPath()
-    {
-        var currentDirectory = new DirectoryInfo(AppContext.BaseDirectory);
-        const string anchor = "Doorlist.slnx";
-        
-        // Recursively look for the current dir containing Doorlist.slnx. Will stop at '/'.
-        while (currentDirectory != null && currentDirectory.Parent != null)
-        {
-            if (currentDirectory.GetFiles(anchor).Any())
-            {
-                return currentDirectory.FullName;
-            }
-            currentDirectory = currentDirectory.Parent;
-        }
-        throw new DirectoryNotFoundException("Couldn't find the backend root.");
-    }
-    
-    /// <summary>
-    /// Prepend a relative path with a specified root path.
-    /// </summary>
-    private static void ConvertRelativePathToAbsolutePath(IConfiguration configuration, string key, string root)
-    {
-        var relativePath = configuration[key];
-        if (!string.IsNullOrEmpty(relativePath) && !Path.IsPathRooted(relativePath))
-        {
-            configuration[key] = Path.GetFullPath(Path.Combine(root, relativePath));
-        }
-    }
-    
     public static IServiceCollection AddInfrastructureServices(
         this IServiceCollection services,
         IConfiguration configuration
         )
     {
-        // Normalise config before startup services.
-        // If this throws an exception it will kill the program gracefully before app.Run().
-        try
-        {
-            var rootPath = GetBackendRootPath();
-            Console.WriteLine("Infrastructure - Found backend root path: " + rootPath);
-
-            ConvertRelativePathToAbsolutePath(configuration, "Kestrel:Endpoints:Https:Certificate:Path", rootPath);
-            ConvertRelativePathToAbsolutePath(configuration, "OpenSSL:ConfigPath", rootPath);
-        }
-        catch (DirectoryNotFoundException dnfe)
-        {
-            Console.WriteLine("Infrastructure - Couldn't find the root path: " + dnfe.Message);
-            throw;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Infrastructure - Generic error in finding the root path: "+ex.Message);
-            throw;
-        }
+        // Convert relative > absolute file config
+        services.NormaliseDevelopmentPaths(configuration);
         
         // Startup Services
         services.AddHostedService<ConfigurationValidatorService>();
         services.AddHostedService<PostQuantumStartupService>();
         
         // Setup DB
-        var db = configuration.GetSection("Databases:DoorlistAPI");
-        string? connectionString = new NpgsqlConnectionStringBuilder
-        {
-            Host = db.GetValue<string>("Host"),
-            Port = db.GetValue<int>("Port"),
-            Database = db.GetValue<string>("Database"),
-            Username = db.GetValue<string>("Username"), // secret
-            Password = db.GetValue<string>("Password"), // secret
-        }.ConnectionString; 
-        services.AddDbContext<DoorlistDbContext>(options =>
-            options.UseNpgsql(
-                connectionString,
-                npgsql => npgsql.MigrationsAssembly(typeof(DoorlistDbContext).Assembly.FullName)
-            ));
+        services.AddPersistenceInfrastructure(configuration);
         
-        // Infrastructure Entity persistence
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
-        
-        services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IUserLoginRepository, UserLoginRepository>();
-        
-        // Keycloak: Register the realm details for DI.
-        var keycloakSection = configuration.GetSection("Keycloak");
-        services.Configure<KeycloakSettings>(keycloakSection);
-        var keycloakSettings = keycloakSection.Get<KeycloakSettings>() ?? throw new InvalidOperationException("Could not bind KeycloakSettings configuration section.");
-        
-        // Keycloak: Establish handlers for incoming authentication
-        services.AddAuthorization().AddKeycloakAuthorization();
-        
-        // Keycloak: Use the Duende OpenID Connect library for token management
-        services.AddDistributedMemoryCache();
-        services.AddClientCredentialsTokenManagement().AddClient("keycloak.admin.token", client =>
-        {
-            client.TokenEndpoint    = new Uri($"{keycloakSettings.AuthServerUrl}/realms/{keycloakSettings.Realm}/protocol/openid-connect/token");
-            client.ClientId         = ClientId.Parse(keycloakSettings.Resource); 
-            client.ClientSecret     = ClientSecret.Parse(keycloakSettings.Secret);
-        });
-        
-        // Keycloak: Configure the outbound admin client
-        services.AddKeycloakAdminHttpClient(options => 
-            { 
-                options.AuthServerUrl       = keycloakSettings.AuthServerUrl;
-                options.Realm               = keycloakSettings.Realm;
-                options.Resource            = keycloakSettings.Resource;
-                options.SslRequired         = keycloakSettings.SslRequired;
-                options.Credentials         = new KeycloakClientInstallationCredentials
-                {
-                    Secret  = keycloakSettings.Secret,
-                };
-            })
-        .AddClientCredentialsTokenHandler(ClientCredentialsClientName.Parse("keycloak.admin.token"));
-        
-        services.AddScoped<IIdentityProvisionerService, KeycloakProvisionerService>();
+        // Setup identity provisioners
+        services.AddIdentityInfrastructure(configuration);
         
         return services;
     }

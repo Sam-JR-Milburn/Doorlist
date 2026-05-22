@@ -1,4 +1,4 @@
-namespace Doorlist.Presentation.DependencyInjection;
+namespace Doorlist.Presentation.DependencyInjectionExtensions;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;

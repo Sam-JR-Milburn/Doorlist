@@ -1,4 +1,4 @@
-namespace Doorlist.Presentation.DependencyInjection;
+namespace Doorlist.Presentation.DependencyInjectionExtensions;
 
 using Doorlist.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;

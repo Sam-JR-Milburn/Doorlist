@@ -1,4 +1,4 @@
-namespace Doorlist.Presentation.DependencyInjection;
+namespace Doorlist.Presentation.DependencyInjectionExtensions;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Protocols.Configuration;
@@ -52,12 +52,8 @@ public static class SecurityConfigurationExtensions
                         $"https://doorlist_keycloak_server:8443/realms/{realm}/"
                     }
                 };
-            });
-            
-            return services.AddAuthorization(options =>
-            {
-                options.AddPolicy("UserPolicy", policy => policy.RequireRole("user"));
-                options.AddPolicy("AdminPolicy", policy => policy.RequireRole("admin"));
-            });
+            }); 
+        
+        return services;
     }
 }

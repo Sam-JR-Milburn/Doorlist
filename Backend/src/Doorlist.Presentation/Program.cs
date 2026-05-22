@@ -2,7 +2,7 @@ using Doorlist.Application;
 using Doorlist.Infrastructure;
 
 using Doorlist.Presentation.Middleware;
-using Doorlist.Presentation.DependencyInjection;
+using Doorlist.Presentation.DependencyInjectionExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
 

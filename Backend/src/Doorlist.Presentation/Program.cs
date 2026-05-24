@@ -7,7 +7,10 @@ using Doorlist.Presentation.DependencyInjectionExtensions;
 var builder = WebApplication.CreateBuilder(args);
 
 // Feature components
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<ApiResponseFilter>();
+});
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddCustomSwaggerGen();
@@ -20,7 +23,7 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 
 // Middleware and error components
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-builder.Services.AddProblemDetails();
+//builder.Services.AddProblemDetails();
 
 // Called after all the setup.
 var app = builder.Build();

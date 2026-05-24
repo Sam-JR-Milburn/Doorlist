@@ -26,6 +26,5 @@ public class FullUserRegistrationDto
     [RegularExpression(@"^\d{4}-\d{2}-\d{2}$", ErrorMessage = "Date must be in ISO 8601 format. (YYYY-MM-DD")]
     public string DateOfBirth { get; set; } = String.Empty;
     
-    // Nullable for now
-    public IFormFile? ProfilePicture { get; set; }
+    public IFormFile? ProfilePicture { get; set; } // If this changes, it will change via frontend restrictions
 }

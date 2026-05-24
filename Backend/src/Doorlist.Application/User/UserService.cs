@@ -25,22 +25,6 @@ public class UserService : IUserService
         _userRepository = userRepository;
         _userLoginRepository = userLoginRepository;
     }
-
-    /// <summary>
-    /// Delete user, save change to DB.
-    /// </summary>
-    private async Task RollbackUserAsync(Guid userId)
-    {
-        try
-        {
-            await _userRepository.DeleteUserAsync(userId);
-            await _unitOfWork.SaveChangesAsync();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to rollback user {UserId} after registration failure.", userId);
-        }
-    }
     
     public async Task<Result<UserRegistrationResponseDto>> RegisterLocalAsync(FullUserRegistrationDto registrationData, CancellationToken cancellationToken)
     {
@@ -49,23 +33,24 @@ public class UserService : IUserService
         {
             return Result<UserRegistrationResponseDto>.Failure("Invalid date format: requires ISO 8601 (YYYY-MM-DD)", ErrorType.Validation);
         }
+
+        await using var transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken);
         
         // Sign-up user.
-        User user = new User(registrationData.FirstName, registrationData.LastName, dateOfBirth);
         string? createdKeycloakSub = null;
         try
         {
+            User user = new User(registrationData.FirstName, registrationData.LastName, dateOfBirth);
+            
             // Attempt to save the user to the DB
             await _userRepository.AddUserAsync(user); 
-            var dbResult = await _unitOfWork.SaveChangesAsync();
+            var dbResult = await _unitOfWork.SaveChangesAsync(cancellationToken);
             if (dbResult == 0) return Result<UserRegistrationResponseDto>.Failure("Database save failed", ErrorType.DependencyFailure);
             
             // Attempt registration, rollback on failure.
             var identityResult = await _identityProvisionerService.CreateUserAsync(registrationData.Email, registrationData.Password, user.Id, cancellationToken);
             if (!identityResult.IsSuccess)
             {
-                // Delete user, rollback.
-                await RollbackUserAsync(user.Id);
                 return Result<UserRegistrationResponseDto>.Failure(identityResult.ErrorMessage ?? "", identityResult.ErrorType);
             }
             
@@ -75,6 +60,8 @@ public class UserService : IUserService
             user.LinkIdentity(_identityProvisionerService.ProviderName, createdKeycloakSub!, _identityProvisionerService.Issuer);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             
+            await transaction.CommitAsync(cancellationToken); // Commit to the DB
+            
             // Success! 
             return Result<UserRegistrationResponseDto>.Success(new UserRegistrationResponseDto { Id = user.Id, FirstName = user.FirstName, LastName = user.LastName });
         }
@@ -83,9 +70,17 @@ public class UserService : IUserService
             _logger.LogError(ex, "Registration failed for {Email}", registrationData.Email);
             if (createdKeycloakSub != null)
             {
-                await _identityProvisionerService.DeleteUserAsync(createdKeycloakSub, cancellationToken);
+                try
+                {
+                    await _identityProvisionerService.DeleteUserAsync(createdKeycloakSub,
+                        CancellationToken.None); // Don't cancel the rollback
+                }
+                catch (Exception kcEx)
+                {
+                    _logger.LogCritical(kcEx.Message, "Failed to delete Keycloak user {UserId}", createdKeycloakSub);
+                }
             }
-            await RollbackUserAsync(user.Id);
+            // Transaction drops out of scope, implicit rollback
             return Result<UserRegistrationResponseDto>.Failure(ex.Message, ErrorType.DependencyFailure);
         }
     }

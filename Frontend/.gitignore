@@ -37,3 +37,8 @@ Thumbs.db
 **/*.csr
 **/*.crt
 **/*.env
+
+# 
+.env
+.env.*
+!env.development

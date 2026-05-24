@@ -31,29 +31,58 @@ public class UserController :  ControllerBase
     [HttpPost]
     [Route("registerUserInternal")]
     [Consumes("multipart/form-data")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status499ClientClosedRequest)]
     [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
-    public async Task<IActionResult> RegisterUserInternal([FromForm] FullUserRegistrationDto registrationData)
+    public async Task<IActionResult> RegisterUserInternal(
+        [FromForm] FullUserRegistrationDto registrationData, 
+        CancellationToken requestAborted)
     {
-        Result<UserRegistrationResponseDto> result = await _userService.RegisterLocalAsync(registrationData, CancellationToken.None);
-        if (result.IsSuccess)
-        {
-            UserRegistrationResponseDto? resultData = result.Value;
-            return Ok(resultData); 
-        }
+        using var timeoutSource = new CancellationTokenSource(TimeSpan.FromSeconds(4));
+        using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(requestAborted, timeoutSource.Token);
 
-        switch (result.ErrorType)
+        try
         {
-            case ErrorType.Validation:
-                return BadRequest(result.ErrorMessage); // Date parsing issues
-            case ErrorType.Conflict:
-                return Conflict(result.ErrorMessage); // If the email already exists
-            case ErrorType.DependencyFailure:
-                return StatusCode(503, result.ErrorMessage); // Service Unavailable, if either Keycloak or the DB repos are down.
-            default:
-                return BadRequest(result.ErrorMessage);
+            Result<UserRegistrationResponseDto> result =
+                await _userService.RegisterLocalAsync(registrationData, linkedSource.Token);
+            if (result.IsSuccess)
+            {
+                UserRegistrationResponseDto? resultData = result.Value;
+                return CreatedAtRoute(nameof(GetUserById), new { id = resultData?.Id }, resultData);
+            }
+
+            switch (result.ErrorType)
+            {
+                case ErrorType.Validation:
+                    return BadRequest(result.ErrorMessage); // Date parsing issues
+                case ErrorType.Conflict:
+                    return Conflict(result.ErrorMessage); // If the email already exists
+                case ErrorType.DependencyFailure:
+                    return
+                        StatusCode(503,
+                            result.ErrorMessage); // Service Unavailable, if either Keycloak or the DB repos are down.
+                default:
+                    return BadRequest(result.ErrorMessage);
+            }
+        }
+        // Catch timeouts
+        catch (OperationCanceledException) when (timeoutSource.IsCancellationRequested)
+        {
+            _logger.LogError("Registration request timed out at the controller threshold.");
+            return StatusCode(503, "Identity service took too long to respond.");
+        }
+        // Catch user disconnection
+        catch (OperationCanceledException)
+        {
+            _logger.LogError("Registration request timed due to client disconnection.");
+            return StatusCode(499, "Client closed request");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, ex.Message);
+            return StatusCode(500, "Internal server error");
         }
     }
     
@@ -67,5 +96,13 @@ public class UserController :  ControllerBase
     public async Task<IActionResult> RegisterUserExternal()
     {
         return StatusCode(500, "Not Implemented");
+    }
+
+    [Authorize]
+    [HttpGet("{id:guid}", Name = nameof(GetUserById))]
+    // Produces Response Type here
+    public async Task<IActionResult> GetUserById(Guid id)
+    {
+        throw new NotImplementedException();
     }
 }

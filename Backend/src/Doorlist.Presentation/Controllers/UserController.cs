@@ -97,7 +97,13 @@ public class UserController :  ControllerBase
     {
         return StatusCode(500, "Not Implemented");
     }
-
+    
+    /// <summary>
+    /// Get User details about a GUID.
+    /// </summary>
+    /// <remarks>
+    /// This will be the first real area touching authorisation
+    /// </remarks>
     [Authorize]
     [HttpGet("{id:guid}", Name = nameof(GetUserById))]
     // Produces Response Type here
@@ -105,4 +111,5 @@ public class UserController :  ControllerBase
     {
         throw new NotImplementedException();
     }
+    
 }

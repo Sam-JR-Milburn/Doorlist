@@ -2,11 +2,11 @@ import { ApiResponse, ClientHttpError } from "@/app/api/types";
 import {
     FullUserRegistrationDto, UserRegistrationResponseDto,
 } from "@/app/api/User/types";
-import {ApiError} from "next/dist/server/api-utils";
 
 const BASE_API_URL = process.env.NEXT_PUBLIC_API_URL || ""; // Read from .env.*
 
 export const User = {
+
     // Register a user with the Keycloak service
     registerUserInternal: async (payload: FullUserRegistrationDto): Promise<ApiResponse<UserRegistrationResponseDto>> => {
         let response: Response | undefined;

@@ -8,3 +8,6 @@ Backend/src/Doorlist.Domain/obj
 Backend/src/Doorlist.Application/obj
 Backend/src/Doorlist.Infrastructure/obj
 Backend/src/Doorlist.Presentation/obj
+
+# Editing/UI Work
+doorlist.xcf

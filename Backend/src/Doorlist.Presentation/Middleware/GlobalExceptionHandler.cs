@@ -1,5 +1,7 @@
 namespace Doorlist.Presentation.Middleware;
 
+using System.Diagnostics;
+using System.Net;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
@@ -22,23 +24,35 @@ public class GlobalExceptionHandler : IExceptionHandler
     /// <param name="httpContext">Context for this specific HTTP request, including route, user, response stream</param>
     /// <param name="exception">The exception that has specifically occurred</param>
     /// <param name="cancellationToken">Monitor if the request is aborted</param>
-    public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
+    public async ValueTask<bool> TryHandleAsync(
+        HttpContext httpContext, 
+        Exception exception,
+        CancellationToken cancellationToken)
     {
-        // Determine cause.
-        var requestMethod = httpContext.Request.Method;
-        var requestPath = httpContext.Request.Path;
-        var userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "anonymous";
-        _logger.LogError(exception, "An unhandled exception occurred at path {Path} (Method: {Method}). Message: {Message}", requestPath, requestMethod, exception.Message);
+        var traceId = Activity.Current?.Id ?? httpContext.TraceIdentifier;
+        _logger.LogError(exception, "Unhandled system execution fault trapped. TraceId: {TraceId}", traceId);
+
+        int statusCode = (int)HttpStatusCode.InternalServerError;
+        httpContext.Response.StatusCode = statusCode;
+        httpContext.Response.ContentType = "application/json";
         
-        // Warn the client.
-        var problemDetails = new ProblemDetails()
+        var errorWrapper = new
         {
-            Status = StatusCodes.Status500InternalServerError,
-            Title = "Server Error",
-            Detail = "An unexpected error has occurred on the server."
+            Success = false,
+            StatusCode = statusCode,
+            Data = (object?)null,
+            Error = new {
+                message = "A critical system exception occurred.", 
+                #if DEBUG
+                detail = exception.Message,
+                stackTrace = exception.StackTrace
+                #endif
+            },
+            TimeStamp = DateTime.UtcNow.ToString("o"),
+            RequestId = traceId
         };
-        httpContext.Response.StatusCode = problemDetails.Status.Value;
-        await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
+        await httpContext.Response.WriteAsJsonAsync(errorWrapper, cancellationToken);
         return true;
     }
+    
 }

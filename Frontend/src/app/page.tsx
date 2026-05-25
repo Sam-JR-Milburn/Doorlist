@@ -1,5 +1,10 @@
+import {Register} from "@/app/components/Auth/Register/Register";
+
 export default function Home() {
   return (
-    <p>Welcome to Doorlist!</p>
+      <div>
+        <p>Register for Doorlist!</p>
+        <Register />
+      </div>
   );
 }

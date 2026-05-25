@@ -21,13 +21,14 @@ builder.Services.AddKeycloakJwtAuthentication(builder.Configuration);
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
-// Middleware and error components
+// Middleware and error components: even the GlobalExceptionHandler should handle an ApiResponse style call
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-//builder.Services.AddProblemDetails();
+builder.Services.AddProblemDetails(); 
 
 // Called after all the setup.
 var app = builder.Build();
 app.UseExceptionHandler(); // Configure the GlobalExceptionHandler
+app.UseCors("DoorlistFrontend");
 
 if (app.Environment.IsDevelopment())
 {
@@ -43,7 +44,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("DoorlistFrontend");
 
 app.UseAuthentication();
 app.UseAuthorization();

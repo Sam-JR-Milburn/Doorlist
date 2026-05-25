@@ -13,7 +13,7 @@ export const RootLayout = ({ children, headerActions }: LayoutProps) => {
     // Check for authenticated status here
     // const { isAuthenticated, user, logout, login } = UseAuth();
     const isAuthenticated: boolean = true;
-    const user = { firstName: "John", lastName: "Smith" };
+    const user = { firstName: "Sam", lastName: "M" };
 
     return (
         <div className={styles.rootLayoutContainer}>

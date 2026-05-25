@@ -16,6 +16,7 @@ export const User = {
             formData.append("firstName", payload.firstName);
             formData.append("lastName", payload.lastName);
             formData.append("dateOfBirth", payload.dateOfBirth);
+            formData.append("password", payload.password);
             if (payload.profilePicture) {
                 formData.append("profilePicture", payload.profilePicture);
             }
@@ -23,6 +24,7 @@ export const User = {
                 {
                     method: "POST",
                     body: formData,
+                    mode: "cors",
                 });
 
             const contentType = response.headers.get("content-type");

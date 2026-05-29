@@ -1,13 +1,13 @@
-import { ApiResponse, ClientHttpError } from "@/app/api/types";
+import { ApiResponse, ClientHttpError } from "@/api/types";
 import {
     FullUserRegistrationDto, UserRegistrationResponseDto,
-} from "@/app/api/User/types";
+} from "@/api/User/types";
 
 const BASE_API_URL = process.env.NEXT_PUBLIC_API_URL || ""; // Read from .env.*
 
 export const User = {
 
-    // Register a user with the Keycloak service
+    // RegisterUserPage a user with the Keycloak service
     registerUserInternal: async (payload: FullUserRegistrationDto): Promise<ApiResponse<UserRegistrationResponseDto>> => {
         let response: Response | undefined;
         try {
@@ -16,6 +16,7 @@ export const User = {
             formData.append("firstName", payload.firstName);
             formData.append("lastName", payload.lastName);
             formData.append("dateOfBirth", payload.dateOfBirth);
+            formData.append("password", payload.password);
             if (payload.profilePicture) {
                 formData.append("profilePicture", payload.profilePicture);
             }
@@ -23,6 +24,7 @@ export const User = {
                 {
                     method: "POST",
                     body: formData,
+                    mode: "cors",
                 });
 
             const contentType = response.headers.get("content-type");

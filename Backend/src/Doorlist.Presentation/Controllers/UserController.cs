@@ -50,7 +50,7 @@ public class UserController :  ControllerBase
             if (result.IsSuccess)
             {
                 UserRegistrationResponseDto? resultData = result.Value;
-                return CreatedAtRoute(nameof(GetUserById), new { id = resultData?.Id }, resultData);
+                return CreatedAtRoute(nameof(GetUserById), new { id = resultData?.UserId }, resultData);
             }
 
             switch (result.ErrorType)

@@ -1,0 +1,21 @@
+.navLink {
+    text-decoration: none;
+    color: var(--color-header-text);
+
+    display: inline-block;
+    font-weight: 500;
+
+    transition: background-color 0.1s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.1s cubic-bezier(0.4, 0, 0.2, 1),
+        color 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.navLink:visited {
+    color: var(--color-header-text);
+}
+
+.navLink:hover,
+.navLink:focus-visible {
+    outline: none;
+    color: var(--color-site-primary-theme);
+}

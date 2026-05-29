@@ -1,0 +1,10 @@
+.rootLayoutContainer {
+    display: grid;
+    grid-template-rows: 10vh 1fr;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.mainContainer {
+    overflow-y: auto;
+}

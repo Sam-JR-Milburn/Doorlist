@@ -31,6 +31,7 @@ public class UserService : IUserService
         // Check for ISO 8601 YYYY-MM-DD
         if (!DateTime.TryParse(registrationData.DateOfBirth, out var dateOfBirth))
         {
+            _logger.LogError("Date of birth {DateOfBirth} is not a valid ISP 8601 date", registrationData.DateOfBirth);
             return Result<UserRegistrationResponseDto>.Failure("Invalid date format: requires ISO 8601 (YYYY-MM-DD)", ErrorType.Validation);
         }
 
@@ -63,7 +64,7 @@ public class UserService : IUserService
             await transaction.CommitAsync(cancellationToken); // Commit to the DB
             
             // Success! 
-            return Result<UserRegistrationResponseDto>.Success(new UserRegistrationResponseDto { Id = user.Id, FirstName = user.FirstName, LastName = user.LastName });
+            return Result<UserRegistrationResponseDto>.Success(new UserRegistrationResponseDto { UserId = user.Id, FirstName = user.FirstName, LastName = user.LastName });
         }
         catch (Exception ex)
         {

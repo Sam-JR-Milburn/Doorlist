@@ -1,0 +1,9 @@
+.doorlistHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+
+    background-color: var(--color-header-main);
+    color: var(--color-header-text);
+}

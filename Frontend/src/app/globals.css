@@ -1,0 +1,37 @@
+/* theme switching */
+:root {
+
+
+    --font-neue-haas-grotesk: 'Neue Haas Grotesk', sans-serif; /* Fallback */
+
+    --color-background-main: #f7f6f5;
+    --color-text-main: #1a1a24;
+
+    --color-header-main: #1a1a24;
+    --color-header-text: #f7f6f5;
+    --color-header-text-highlighted: #ede8d0; /* Cream: #ede8d0 */
+
+    --color-site-primary-theme: #ee8802;
+}
+
+/* broad switching */
+
+[data-theme="dark"] {
+    --color-background-main: #1a1a24;
+    --color-text-main: #f7f6f5;
+
+    --color-header-main: #1a1a24;
+    --color-header-text: #f7f6f5;
+    --color-header-text-highlighted: #ede8d0;
+
+    --color-site-primary-theme: #ee8802;
+}
+
+body {
+    font-family: var(--font-neue-haas-grotesk), "Segoe UI", sans-serif;
+    margin: 0;
+    padding: 0;
+
+    background-color: var(--color-background-main);
+    color: var(--color-text-main);
+}

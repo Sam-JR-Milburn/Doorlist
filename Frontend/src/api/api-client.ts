@@ -1,5 +1,5 @@
 // API Domains
-import { User } from "@/app/api/User";
+import { User } from "@/api/User";
 // Import { OtherControllerDomain } from "@/app/api/OtherDomain";
 
 // Expose all of the APIs that

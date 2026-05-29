@@ -2,11 +2,11 @@
 
 import React, { useState } from "react";
 
-import { api } from "@/app/api/api-client";
-import { FullUserRegistrationDto } from "@/app/api/User/types";
+import { api } from "@/api/api-client";
+import { FullUserRegistrationDto } from "@/api/User/types";
 
 
-export const Register = () => {
+export const RegisterUserPage = () => {
     // Capture form
     const [email, setEmail] = useState("");
     const [firstName, setFirstName] = useState("");
@@ -20,7 +20,7 @@ export const Register = () => {
     const [errorMessage, setErrorMessage] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
 
-    // ----
+    // Cleanly grab the file
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const fileList = event.target.files;
         if (fileList && fileList.length > 0) {
@@ -30,7 +30,6 @@ export const Register = () => {
         }
     }
 
-    // ----
     const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
         event.preventDefault();
 
@@ -92,6 +91,11 @@ export const Register = () => {
                 <button type="submit">
                     Register
                 </button>
+                {loading ?
+                    <p> LOADING... </p>
+                    :
+                    <></>
+                }
             </form>
         </div>
     );

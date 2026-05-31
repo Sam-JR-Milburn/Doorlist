@@ -1,8 +1,12 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
       <div>
           <p>Home Page</p>
-          <p>stuff will be here before long</p>
+          <div>
+              <Link href={"/dashboard"}>Dashboard</Link>
+          </div>
       </div>
   );
 }

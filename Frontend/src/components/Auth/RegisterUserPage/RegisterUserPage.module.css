@@ -1,0 +1,74 @@
+.registerLayout {
+    display: grid;
+    place-items: center;
+
+    min-height: 90vh;
+    background-color: var(--color-background-main);
+}
+
+.registerUserForm {
+    background-color: var(--color-header-main);
+    color: var(--color-header-text);
+
+    width: 100%;
+    max-width: 30vw;
+
+    padding: 4vh 2vh;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    gap: 1vh;
+}
+
+.introText {
+    color: var(--color-header-text);
+
+    align-self: center;
+    padding-bottom: 4vh;
+}
+
+/* ---- */
+.registerUserRow {
+    display: flex;
+    flex-direction: row;
+
+    justify-content: space-between;
+
+    gap: 0.5vh;
+}
+
+.registerUserRow label {
+    font-weight: 400;
+    color: var(--color-header-text);
+}
+
+.registerUserRow input {
+    padding: 0.5vw;
+
+    min-width: 50%;
+
+    border: 1px solid var(--color-header-text);
+    border-radius: 6px;
+
+    font-family: inherit;
+    background-color: transparent;
+    color: var(--color-header-text);
+}
+
+.registerButton {
+
+}
+
+/* Phone/Tablet Adjustments */
+@media (max-width: 1024px) {
+    .registerUserForm {
+        width: 80vw;
+        max-width: 80vw;
+
+        padding: 4vh 2vh;
+
+        gap: 1.5vh;
+    }
+}

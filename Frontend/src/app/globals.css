@@ -1,9 +1,7 @@
-/* theme switching */
 :root {
-
-
     --font-neue-haas-grotesk: 'Neue Haas Grotesk', sans-serif; /* Fallback */
 
+    /* Light Theme */
     --color-background-main: #f7f6f5;
     --color-text-main: #1a1a24;
 
@@ -14,9 +12,9 @@
     --color-site-primary-theme: #ee8802;
 }
 
-/* broad switching */
-
 [data-theme="dark"] {
+
+    /* Dark Theme */
     --color-background-main: #1a1a24;
     --color-text-main: #f7f6f5;
 

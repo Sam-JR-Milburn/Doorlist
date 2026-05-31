@@ -17,10 +17,9 @@ export const NavLink = ({ href, children }: NavLinkProps) => {
         <Link
             href={href}
             className={`${styles.navLink} ${isActive ? styles.active : ""}`}
-            // Accessible attribute telling screen readers this is the current page
             aria-current={isActive ? "page" : undefined}
         >
-            {children}
+            { children }
         </Link>
     );
 };

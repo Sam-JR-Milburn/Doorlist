@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import { api } from "@/api/api-client";
 import { FullUserRegistrationDto } from "@/api/User/types";
 
+import styles from "./RegisterUserPage.module.css";
 
 export const RegisterUserPage = () => {
     // Capture form
@@ -62,33 +63,35 @@ export const RegisterUserPage = () => {
     }
 
     return (
-        <div>
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label htmlFor="firstName">First name</label>
+        <div className={styles.registerLayout}>
+            <form onSubmit={handleSubmit} className={styles.registerUserForm}>
+                <h3 className={styles.introText}>Register for Doorlist</h3>
+
+                <div className={styles.registerUserRow}>
+                    <label htmlFor="firstName">First Name</label>
                     <input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
                 </div>
-                <div>
-                    <label htmlFor="lastName">Last name</label>
+                <div className={styles.registerUserRow}>
+                    <label htmlFor="lastName">Last Name</label>
                     <input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
                 </div>
-                <div>
-                    <label htmlFor="dateOfBirth">Date of birth</label>
+                <div className={styles.registerUserRow}>
+                    <label htmlFor="dateOfBirth">Date of Birth</label>
                     <input id="dateOfBirth" type="date" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} required />
                 </div>
-                <div>
-                    <label htmlFor="profilePicture">Upload a profile picture</label>
+                <div className={styles.registerUserRow}>
+                    <label htmlFor="profilePicture">Profile Picture</label>
                     <input id="profilePicture" type="file" accept="image/png, image/jpeg, image/webp" onChange={handleFileChange} />
                 </div>
-                <div>
+                <div className={styles.registerUserRow}>
                     <label htmlFor="email">Email</label>
                     <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                 </div>
-                <div>
+                <div className={styles.registerUserRow}>
                     <label htmlFor="password">Password</label>
                     <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                 </div>
-                <button type="submit">
+                <button type="submit" className={styles.registerButton}>
                     Register
                 </button>
                 {loading ?

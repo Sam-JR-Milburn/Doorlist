@@ -1,0 +1,11 @@
+
+.DashboardNav {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    border-bottom: 2px solid var(--color-text-main);
+    padding-top: 1vh;
+    padding-left: 1vw;
+    padding-right: 1vw;
+}

@@ -7,4 +7,13 @@
 
 .mainContainer {
     overflow-y: auto;
+
+    padding: 0 1vw;
+}
+
+/* Phone/Tablet Adjustments */
+@media (max-width: 1024px) {
+    .mainContainer {
+        padding: 0 4vw;
+    }
 }

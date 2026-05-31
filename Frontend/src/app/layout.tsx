@@ -9,16 +9,31 @@ const neueHaas = localFont({
   src: [
     {
       path: "../../public/fonts/NeueHaasGroteskDisplay/NeueHaasDisplayXXThin.ttf",
-      weight: "200",
+      weight: "100",
       style: "normal"
     },
     {
       path: "../../public/fonts/NeueHaasGroteskDisplay/NeueHaasDisplayThin.ttf",
-      weight: "500",
+      weight: "200",
+      style: "normal"
+    },
+    {
+      path: "../../public/fonts/NeueHaasGroteskDisplay/NeueHaasDisplayLight.ttf",
+      weight: "300",
       style: "normal"
     },
     {
       path: "../../public/fonts/NeueHaasGroteskDisplay/NeueHaasDisplayMedium.ttf",
+      weight: "500",
+      style: "normal"
+    },
+    {
+      path: "../../public/fonts/NeueHaasGroteskDisplay/NeueHaasDisplayBold.ttf",
+      weight: "700",
+      style: "normal"
+    },
+    {
+      path: "../../public/fonts/NeueHaasGroteskDisplay/NeueHaasDisplayBlack.ttf",
       weight: "900",
       style: "normal"
     }

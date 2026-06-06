@@ -19,7 +19,7 @@ export const ActionLink = ({ onClick, disabled = false, children, className = ""
             type={"button"}
             onClick={onClick}
             disabled={disabled}
-            className={`${navStyles.navInteractable} ${disabled ? "" /* styles.disabled */ : ""} ${className}`}>
+            className={`${navStyles.navInteractable} ${disabled ? navStyles.navInteractableDisabled /* styles.disabled */ : ""} ${className}`}>
             {children}
         </button>
     );

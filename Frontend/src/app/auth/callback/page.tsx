@@ -25,6 +25,7 @@ export default function AuthCallbackPage() {
         const savedNonce = window.sessionStorage.getItem("doorlist_csrf_nonce");
 
         if (!code || !savedVerifier) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setError("Authorization context lost. Please log-in again.");
             return;
         }

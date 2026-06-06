@@ -2,6 +2,7 @@ import React from "react";
 
 import styles from "./DynamicHeader.module.css";
 import { NavLink } from "@/components/Navigation/NavComponents/NavLink/NavLink";
+import {LoginRedirect} from "@/components/Auth/LoginRedirect/LoginRedirect";
 
 export const DynamicHeader = () => {
     // Placeholder for auth libs
@@ -17,7 +18,7 @@ export const DynamicHeader = () => {
 
             {!isAuthenticated ?
                 <div className={styles.authNavLinks}>
-                    <NavLink href={"/login"}><h4>Login</h4></NavLink>
+                    <LoginRedirect />
                     <NavLink href={"/register"}><h4>Register</h4></NavLink>
                 </div> :
                 <div className={styles.authNavLinks}>

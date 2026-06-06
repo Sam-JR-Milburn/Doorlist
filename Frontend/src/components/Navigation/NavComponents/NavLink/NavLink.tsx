@@ -2,8 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import styles from "./NavLink.module.css";
+import navStyles from "@/components/Navigation/NavComponents/NavComponents.module.css";
 
+/**
+ * NavLink is for direct links to pages, including externally.
+ */
 interface NavLinkProps {
     href: string;
     children: React.ReactNode;
@@ -16,7 +19,7 @@ export const NavLink = ({ href, children }: NavLinkProps) => {
     return (
         <Link
             href={href}
-            className={`${styles.navLink} ${isActive ? styles.active : ""}`}
+            className={`${navStyles.navInteractable} ${isActive ? "" /* styles.active */ : ""}`}
             aria-current={isActive ? "page" : undefined}
         >
             { children }

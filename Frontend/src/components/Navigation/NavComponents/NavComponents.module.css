@@ -1,4 +1,4 @@
-.navLink {
+.navInteractable {
     text-decoration: none;
     color: var(--color-header-text);
 
@@ -10,12 +10,14 @@
         color 0.1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.navLink:visited {
+.navInteractable:visited {
     color: var(--color-header-text);
 }
 
-.navLink:hover,
-.navLink:focus-visible {
+.navInteractable:hover,
+.navInteractable:focus-visible {
     outline: none;
     color: var(--color-site-primary-theme);
 }
+
+/* .navInteractable.disabled??? */

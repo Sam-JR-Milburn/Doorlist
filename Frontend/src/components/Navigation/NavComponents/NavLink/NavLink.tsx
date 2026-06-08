@@ -20,7 +20,7 @@ export const NavLink = ({ href, children }: NavLinkProps) => {
     return (
         <Link
             href={href}
-            className={`${navStyles.navInteractable} ${isActive ? navStyles.navInteractableDisabled : ""}`}
+            className={`${navStyles.navInteractable}`}
             aria-current={isActive ? "page" : undefined}
         >
             { children }

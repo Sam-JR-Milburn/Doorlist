@@ -2,6 +2,7 @@
 
 import React from "react";
 import navStyles from "@/components/Navigation/NavComponents/NavComponents.module.css";
+import actionLinkStyles from "@/components/Navigation/NavComponents/ActionLink/ActionLink.module.css";
 
 /**
  * ActionLink is for nav elements suitable for onClick.
@@ -19,7 +20,7 @@ export const ActionLink = ({ onClick, disabled = false, children, className = ""
             type={"button"}
             onClick={onClick}
             disabled={disabled}
-            className={`${navStyles.navInteractable} ${disabled ? navStyles.navInteractableDisabled /* styles.disabled */ : ""} ${className}`}>
+            className={`${navStyles.navInteractable} ${actionLinkStyles.actionButton} ${className}`}>
             {children}
         </button>
     );

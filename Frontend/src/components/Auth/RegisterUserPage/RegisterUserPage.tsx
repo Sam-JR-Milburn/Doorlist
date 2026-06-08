@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 
-import { api } from "@/api/api-client";
-import { FullUserRegistrationDto } from "@/api/User/types";
+import { api } from "@/services/api/api-client";
+import { FullUserRegistrationDto } from "@/services/api/User/types";
 
 import styles from "./RegisterUserPage.module.css";
 

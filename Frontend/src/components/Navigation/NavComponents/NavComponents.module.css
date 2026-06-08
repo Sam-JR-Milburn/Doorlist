@@ -20,6 +20,6 @@
     color: var(--color-site-primary-theme);
 }
 
-.navInteractableDisabled { /* native CSS disabled funct? */
-    color: grey; /* TODO: Replace me with a named variable */
+.navInteractable:disabled {
+    color: var(--color-header-text);
 }

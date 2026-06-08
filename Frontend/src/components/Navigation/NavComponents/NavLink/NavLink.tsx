@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import navStyles from "@/components/Navigation/NavComponents/NavComponents.module.css";
@@ -19,7 +20,7 @@ export const NavLink = ({ href, children }: NavLinkProps) => {
     return (
         <Link
             href={href}
-            className={`${navStyles.navInteractable} ${isActive ? "" /* styles.active */ : ""}`}
+            className={`${navStyles.navInteractable} ${isActive ? navStyles.navInteractableDisabled : ""}`}
             aria-current={isActive ? "page" : undefined}
         >
             { children }

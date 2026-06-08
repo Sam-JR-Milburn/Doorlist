@@ -3,11 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-// ----
-
-
-
-
+import { handleAuthCallbackExchange } from "@/services/auth/keycloakAuthService";
 
 export default function AuthCallbackPage() {
     const searchParams = useSearchParams();
@@ -16,86 +12,37 @@ export default function AuthCallbackPage() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (exchangeAttempted.current) { return; } // Guard-clause against multiple handshakes
+        if (exchangeAttempted.current) { return; }
         exchangeAttempted.current = true;
 
         const code = searchParams.get("code");
         const incomingState = searchParams.get("state");
-        const savedVerifier = window.sessionStorage.getItem("doorlist_pkce_verifier");
-        const savedNonce = window.sessionStorage.getItem("doorlist_csrf_nonce");
 
-        if (!code || !savedVerifier) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setError("Authorization context lost. Please log-in again.");
-            return;
-        }
-        if (incomingState !== savedNonce) { // Anti-CSRF
-            setError("Security validation failure. Please log-in again.");
-            return;
-        }
-
-        // ----
-        const exchangeCodeForTokens = async () => {
-            const KEYCLOAK_URL = process.env.NEXT_PUBLIC_KEYCLOAK_URL || "https://localhost:8443";
-            const REALM = "doorlist";
-            const CLIENT_ID = "doorlist-frontend";
-            const FRONTEND_URL = process.env.NEXT_PUBLIC_FRONTEND_URL || "";
-            const REDIRECT_URI = `${FRONTEND_URL}/auth/callback`;
-
-            // ====
-            const bodyParams = new URLSearchParams();
-            bodyParams.set("grant_type", "authorization_code");
-            bodyParams.set("client_id", CLIENT_ID);
-            bodyParams.set("code", code);
-            bodyParams.set("redirect_uri", REDIRECT_URI);
-
-            bodyParams.set("code_verifier", savedVerifier);
-
+        const executeVerification = async () => {
             try {
+                const tokens = await handleAuthCallbackExchange(code, incomingState);
 
-                const response = await fetch(
-                    `${KEYCLOAK_URL}/realms/${REALM}/protocol/openid-connect/token`,
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/x-www-form-urlencoded",
-                        },
-                        body: bodyParams.toString(),
-                    }
-                );
+                window.sessionStorage.setItem("doorlist_access_token", tokens.accessToken);
 
-                if (!response.ok) {
-                    throw new Error(`Token endpoint rejected handshake (${response.status}): ${response.statusText}`);
-                }
-
-                const tokens = await response.json();
-                window.sessionStorage.setItem("doorlist_auth_token", tokens.access_token);
-
-                // Clear the ephemeral handshake store
-                window.sessionStorage.removeItem("doorlist_pkce_verifier");
-                window.sessionStorage.removeItem("doorlist_csrf_nonce");
+                // DEBUG
+                console.log("Access Token: "+tokens.accessToken);
+                console.log("ID Token: "+tokens.idToken);
+                console.log("Refresh Token: "+tokens.refreshToken);
 
                 router.push("/dashboard");
             } catch (err) {
-                console.log(`Cryptographic token exchange failed: ${err}`);
-                return;
+                console.error(`Cryptographic token validation failed: ${err}`);
+                setError((err as Error).message || "Cryptographic token validation failed");
             }
-        };
-        exchangeCodeForTokens(); // Call, redirect, or don't
+        }
+
+        executeVerification();
     }, [searchParams, router]);
 
-    // Render before redirect
+    // Conditional render?
     if (error) {
-        return (
-            <div>
-                Error: {error}
-            </div>
-        );
+        return (<div style={{color: "red"}}>Security Error</div>);
     } else {
-        return (
-            <div>
-                Verifying Doorlist identity security credentials...
-            </div>
-        );
+        return (<div>Verifying Identity Credentials...</div>);
     }
 }

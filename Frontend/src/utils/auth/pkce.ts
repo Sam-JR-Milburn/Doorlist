@@ -1,3 +1,6 @@
+/**
+ * PKCE Functionality
+ */
 
 export function generateCodeVerifier(): string {
     const array = new Uint32Array(56);

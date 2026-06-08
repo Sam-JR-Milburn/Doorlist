@@ -2,8 +2,46 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 1.5rem;
+    padding: 0 2vw;
+
+    height: 10vh;
 
     background-color: var(--color-header-main);
     color: var(--color-header-text);
+}
+
+.doorlistLogo {
+    /* */
+}
+
+.centralNav {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    min-width: 20vw;
+}
+
+.authNavLinks {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 2vw;
+    font-weight: 500;
+}
+
+/* Phone/Tablet Adjustments */
+@media (max-width: 1024px) {
+    .doorlistHeader {
+        padding: 0 5vw;
+    }
+
+    .centralNav {
+        min-width: 10vw;
+    }
+
+    .authNavLinks {
+        gap: 4vw;
+    }
 }

@@ -38,7 +38,8 @@ Thumbs.db
 **/*.crt
 **/*.env
 
-# 
+# Prevent the env files being committed, exception for development
 !.env.development
 .env
+.env*
 .env.*

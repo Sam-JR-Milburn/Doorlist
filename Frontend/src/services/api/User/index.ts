@@ -1,7 +1,7 @@
-import { ApiResponse, ClientHttpError } from "@/api/types";
+import { ApiResponse, ClientHttpError } from "@/services/api/types";
 import {
     FullUserRegistrationDto, UserRegistrationResponseDto,
-} from "@/api/User/types";
+} from "@/services/api/User/types";
 
 const BASE_API_URL = process.env.NEXT_PUBLIC_API_URL || ""; // Read from .env.*
 

@@ -1,9 +1,13 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import styles from "./NavLink.module.css";
+import navStyles from "@/components/Navigation/NavComponents/NavComponents.module.css";
 
+/**
+ * NavLink is for direct links to pages, including externally.
+ */
 interface NavLinkProps {
     href: string;
     children: React.ReactNode;
@@ -16,11 +20,10 @@ export const NavLink = ({ href, children }: NavLinkProps) => {
     return (
         <Link
             href={href}
-            className={`${styles.navLink} ${isActive ? styles.active : ""}`}
-            // Accessible attribute telling screen readers this is the current page
+            className={`${navStyles.navInteractable}`}
             aria-current={isActive ? "page" : undefined}
         >
-            {children}
+            { children }
         </Link>
     );
 };

@@ -1,0 +1,43 @@
+.wrapper {
+    /* Centre */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+
+    /* Apply variables */
+    height: var(--icon-size, 24px);
+    width: var(--icon-size, 24px);
+    color: var(--icon-colour, currentColor);
+
+    cursor: pointer;
+}
+
+.wrapper svg {
+    color: currentColor;
+    fill: currentColor;
+    stroke: currentColor;
+
+    transition:
+            color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+            fill 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+            stroke 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.wrapper:hover,
+.wrapper:focus-within {
+    color: var(--icon-hover-colour, var(--icon-color, currentColor)); /* Safe Fallbacks */
+}
+
+.wrapper:active {
+    color: var(--icon-active-colour, var(--icon-hover-colour, var(--icon-color, currentColor))); /* Safe Fallbacks */
+}
+
+.wrapper:focus-visible {
+    outline: 2px solid var(--color-site-primary-theme);
+    outline-offset: 4px;
+    border-radius: 4px;
+}
+
+.wrapper svg[fill="none"] { fill: none !important; }
+.wrapper svg[stroke="none"] { stroke: none !important; }

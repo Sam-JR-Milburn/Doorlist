@@ -7,8 +7,9 @@
 
 <br />
 I've decided on NextJS with TypeScript. 
-This is a market choice to cover a React/React-like framework, but any previous experience is in Svelte/TS and each project has it's quirks. 
-I'm intending to use modern features and best practice within the ecosystem. 
+
+This is a market choice to cover a React/React-like framework, but I've had previous experience is in Svelte/TS and each project has it's niche.
+I'll only find out through practice and study - I'm intending to use modern features and best practice within the React ecosystem. 
 
 It does however present an interesting exercise in thinking like a web developer, in patterns that I'm not used to - functional programming, hooks, callbacks, etc. 
 

@@ -14,7 +14,10 @@ interface RedirectUrlConfig {
     frontendUrl?: string;
 }
 
-// Build a valid URL for the PKCE handshake.
+/**
+ * Build a valid URL for the PKCE handshake.
+ * @param config - replacable config for testability reasons
+ */
 export const buildKeycloakAuthorizationUrl = async (config: RedirectUrlConfig = {}): Promise<string> => {
     const KEYCLOAK_URL = config.keycloakUrl || process.env.NEXT_PUBLIC_KEYCLOAK_URL || "https://localhost:8443";
     const REALM = config.realm || "doorlist";
@@ -45,13 +48,19 @@ export const buildKeycloakAuthorizationUrl = async (config: RedirectUrlConfig = 
     return authorisationUrl.toString();
 }
 
+
+
 export interface TokenExchangeResult {
     accessToken: string;
     idToken: string;
     refreshToken: string;
 }
 
-// Yield the token details from the auth callback step.
+/**
+ * Yield the token details from the auth callback step.
+ * @param code - the PKCE
+ * @param incomingState - an anti-CSRF token carried by Keycloak from the first handshake steps
+ */
 export const handleAuthCallbackExchange = async (
     code: string | null,
     incomingState: string | null
@@ -64,8 +73,8 @@ export const handleAuthCallbackExchange = async (
         throw new Error("Security validation failed: authorisation context has been lost");
     }
 
-    // Check against CSRF
-    if (!incomingState || !savedNonce) {
+    // Check against CSRF (equality)
+    if (!incomingState || !savedNonce || incomingState !== savedNonce) {
         throw new Error("Security validation failed: anti-CSRF state token mismatch");
     }
 

@@ -22,9 +22,9 @@ export default function AuthCallbackPage() {
             try {
                 const tokens = await handleAuthCallbackExchange(code, incomingState);
 
+                // TODO: Replace with an encapsulated and auto-refreshing module
                 window.sessionStorage.setItem("doorlist_access_token", tokens.accessToken);
 
-                // DEBUG
                 console.log("Access Token: "+tokens.accessToken);
                 console.log("ID Token: "+tokens.idToken);
                 console.log("Refresh Token: "+tokens.refreshToken);

@@ -13,6 +13,6 @@ This document links to the documentation files for each of the major subprojects
 
 [None Yet]
 
-### Frontend - Framework Undecided
+### Frontend - NextJS with TypeScript
 
-[None Yet]
+[Frontend Documentation](Frontend/frontend.md)

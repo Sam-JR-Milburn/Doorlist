@@ -3,11 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { handleAuthCallbackExchange } from "@/services/auth/keycloakAuthService";
+import {useIdentitySession} from "@/services/auth/IdentityServiceProvider";
 
 export default function AuthCallbackPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
+    const identitySession = useIdentitySession();
+
     const exchangeAttempted = useRef(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -20,14 +22,7 @@ export default function AuthCallbackPage() {
 
         const executeVerification = async () => {
             try {
-                const tokens = await handleAuthCallbackExchange(code, incomingState);
-
-                // TODO: Replace with an encapsulated and auto-refreshing module
-                window.sessionStorage.setItem("doorlist_access_token", tokens.accessToken);
-
-                console.log("Access Token: "+tokens.accessToken);
-                console.log("ID Token: "+tokens.idToken);
-                console.log("Refresh Token: "+tokens.refreshToken);
+                await identitySession.handleCallbackExchange(code, incomingState); // Handles logic, validation and token persistence
 
                 router.push("/dashboard");
             } catch (err) {
@@ -37,7 +32,7 @@ export default function AuthCallbackPage() {
         }
 
         executeVerification();
-    }, [searchParams, router]);
+    }, [searchParams, router, identitySession]);
 
     // Conditional render?
     if (error) {

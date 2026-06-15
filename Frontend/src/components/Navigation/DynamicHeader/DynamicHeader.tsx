@@ -23,11 +23,11 @@ export const DynamicHeader = () => {
 
         const checkAuth = async () => {
             try {
-                const authenticated = await identitySession.isAuthenticated();
+                const authenticated = identitySession.isAuthenticated;
                 let tokenPreview = "";
 
                 if (authenticated) {
-                    const token = identitySession.getRawAccessToken();
+                    const token = identitySession.manager.getRawAccessToken();
                     if (token) {
                         tokenPreview = token.substring(0,10).concat("...");
                     }
@@ -78,7 +78,7 @@ export const DynamicHeader = () => {
                 </div> :
                 <div className={styles.authNavLinks}>
                     <span>Token: {authState.preview}</span>
-                    <ActionLink onClick={() => identitySession.logout()}>Logout</ActionLink>
+                    <ActionLink onClick={() => identitySession.manager.logout()}>Logout</ActionLink>
                 </div>
             }
         </header>

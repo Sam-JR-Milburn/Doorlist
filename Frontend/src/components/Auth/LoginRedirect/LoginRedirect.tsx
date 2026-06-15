@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { ActionLink } from "@/components/Navigation/NavComponents/ActionLink/ActionLink";
 
-import {useIdentitySession} from "@/services/auth/IdentityServiceProvider";
+import { useIdentitySession } from "@/services/auth/IdentityServiceProvider";
 
 export const LoginRedirect = () => {
     const [isRedirecting, setIsRedirecting] = useState<boolean>(false);
@@ -15,7 +15,7 @@ export const LoginRedirect = () => {
 
         try {
             // Build URL, redirect.
-            const authUrl = await identitySession.buildAuthorisationUrl();
+            const authUrl = await identitySession.manager.buildAuthorisationUrl();
             window.location.href = authUrl;
         } catch (err) {
             console.error(`Failed to assemble PKCE redirect URL for login: ${err}`);

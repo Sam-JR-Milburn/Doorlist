@@ -3,12 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import {useIdentitySession} from "@/services/auth/IdentityServiceProvider";
+import { useIdentitySession } from "@/services/auth/IdentityServiceProvider";
 
 export default function AuthCallbackPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const identitySession = useIdentitySession();
+    const { manager, syncAuth } = useIdentitySession();
 
     const exchangeAttempted = useRef(false);
     const [error, setError] = useState<string | null>(null);
@@ -22,9 +22,14 @@ export default function AuthCallbackPage() {
 
         const executeVerification = async () => {
             try {
-                await identitySession.handleCallbackExchange(code, incomingState); // Handles logic, validation and token persistence
+                await manager.handleCallbackExchange(code, incomingState); // Handles logic, validation and token persistence
 
-                router.push("/dashboard");
+                const session = await syncAuth();
+                if (session.isAuthenticated) {
+                    router.push("/dashboard");
+                } else {
+                    throw new Error("Handshake succeeded but the session couldn't be authenticated locally");
+                }
             } catch (err) {
                 console.error(`Cryptographic token validation failed: ${err}`);
                 setError((err as Error).message || "Cryptographic token validation failed");
@@ -32,7 +37,7 @@ export default function AuthCallbackPage() {
         }
 
         executeVerification();
-    }, [searchParams, router, identitySession]);
+    }, [searchParams, router, manager, syncAuth]);
 
     // Conditional render?
     if (error) {

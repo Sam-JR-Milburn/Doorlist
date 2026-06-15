@@ -11,8 +11,6 @@ export const metadata: Metadata = {
   description: "Ticket sales and distribution... but fake!",
 };
 
-import { IdentitySessionProvider } from "@/services/auth/IdentityServiceProvider"; // Load once globally
-
 import { neueHaas } from "@/app/fonts";
 
 export default function RootLayoutContainer({
@@ -23,11 +21,9 @@ export default function RootLayoutContainer({
   return (
     <html lang="en" className={neueHaas.className}>
     <body>
-      <RootLayout>
-        <IdentitySessionProvider>
+        <RootLayout>
           {children}
-        </IdentitySessionProvider>
-      </RootLayout>
+        </RootLayout>
     </body>
     </html>
   );

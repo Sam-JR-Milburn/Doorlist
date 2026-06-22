@@ -38,6 +38,36 @@ In development, port 9443 HTTPS is mapped to port 9080 HTTP. This allows for sev
  - Static images can be mapped directly from the /public folder without requirement to have NodeJS serve them.
  - Ingress control, load balancing, etcetera.
 
+### Token Lifecycle Management
+
+
+#### OIDC Client
+
+The authentication system implements OIDC with PKCE in a 3-step handshake.
+
+[KeycloakAuthManager](../../Frontend/src/services/auth/KeycloakAuthManager.ts) 
+implements the [IIdentitySessionManager](../../Frontend/src/domain/interfaces/IIdentitySessionManager.ts)
+interface to facilitate the OIDC/PKCE transaction. This decouples the OIDC implementation, but it hasn't been strictly separated yet, 
+as can be seen in the [IdentityServiceProvider.tsx](../../Frontend/src/services/auth/IdentityServiceProvider.tsx) 
+component. 
+
+```KeycloakAuthManager``` centralises and manages Keycloak token lifecycle management. 
+Not only is handshake and token session state unified in one location, but the access token is available there and gracefully refreshes in an automated way.
+
+To access the authentication state in a component, call ```useIdentitySession()``` to consume a global ```React.Context``` object. 
+This structure will change, and the ```rawToken``` is really just for informal callback testing.
+
+```ts
+interface IdentityContext {
+    manager: IIdentitySessionManager;
+    isAuthenticated: boolean;
+    rawToken: string | null;
+    syncAuth: () => Promise<{ isAuthenticated: boolean; accessToken: string | null; }>;
+}
+```
+
+Further, the ```getAccessToken()``` function implements a request throttler to ensure that subsequent calls don't induce unnecessary pressure or DoS to the Keycloak OIDC endpoint.  
+
 ### Security Frameworks
 
 Keycloak requires an implementation of Proof Key for Code Exchange (PKCE) for login.

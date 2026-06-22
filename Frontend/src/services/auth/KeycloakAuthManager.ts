@@ -4,7 +4,7 @@ import { jwtDecode, JwtPayload } from "jwt-decode";
 
 /**
  * Keycloak Auth Manager
- * This class handles the authentication OIDC process for Keycloak specifically
+ * This class handles the authentication OIDC process for Keycloak specifically.
  */
 export class KeycloakAuthManager implements IIdentitySessionManager {
     private isRefreshing = false;

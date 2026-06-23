@@ -5,49 +5,18 @@ import styles from "./DynamicHeader.module.css";
 import { NavLink } from "@/components/Navigation/NavComponents/NavLink/NavLink";
 import { LoginRedirect } from "@/components/Auth/LoginRedirect/LoginRedirect";
 import { useIdentitySession } from "@/services/auth/IdentityServiceProvider";
-import {ActionLink} from "@/components/Navigation/NavComponents/ActionLink/ActionLink";
+import { ActionLink } from "@/components/Navigation/NavComponents/ActionLink/ActionLink";
 
 export const DynamicHeader = () => {
-    const identitySession = useIdentitySession();
+    const { isAuthenticated, isReady, manager } = useIdentitySession();
 
     const [isMounted, setIsMounted] = useState<boolean>(false);
-    const [authState, setAuthState] = useState<{ loggedIn: boolean; preview: string | null }>({
-        loggedIn: false,
-        preview: null,
-    });
 
-    // Grab auth state on component load
+    // Guard against SSR hydration mismatch
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setIsMounted(true);
-
-        const checkAuth = async () => {
-            try {
-                const authenticated = identitySession.isAuthenticated;
-                let tokenPreview = "";
-
-                if (authenticated) {
-                    const token = identitySession.manager.getRawAccessToken();
-                    if (token) {
-                        tokenPreview = token.substring(0,10).concat("...");
-                    }
-                }
-
-                setAuthState({
-                    loggedIn: authenticated,
-                    preview: tokenPreview,
-                });
-            } catch (err) {
-                console.error("", err);
-                setAuthState({
-                    loggedIn: false,
-                    preview: null,
-                });
-            }
-        }
-
-        checkAuth();
-    }, [identitySession]);
+    }, []);
 
     if (!isMounted) {
         return (
@@ -57,6 +26,7 @@ export const DynamicHeader = () => {
                 </div>
                 <div className={styles.centralNav}></div>
                 <div className={styles.authNavLinks}>
+                    <h4>Login</h4>
                     <NavLink href={"/register"}><h4>Register</h4></NavLink>
                 </div>
             </header>
@@ -71,14 +41,18 @@ export const DynamicHeader = () => {
 
             <div className={styles.centralNav}></div>
 
-            {!authState.loggedIn ?
+            {!isAuthenticated ?
                 <div className={styles.authNavLinks}>
-                    <LoginRedirect />
+                    <LoginRedirect disabled={!isReady} />
                     <NavLink href={"/register"}><h4>Register</h4></NavLink>
                 </div> :
                 <div className={styles.authNavLinks}>
-                    <span>Token: {authState.preview}</span>
-                    <ActionLink onClick={() => identitySession.manager.logout()}>Logout</ActionLink>
+                    {/*<span>Token: {authState.preview}</span> */}
+                    <ActionLink
+                        disabled={!isReady}
+                        onClick={() => manager.logout()}>
+                        <h4>Logout</h4>
+                    </ActionLink>
                 </div>
             }
         </header>

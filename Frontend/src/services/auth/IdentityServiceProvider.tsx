@@ -1,42 +1,56 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { IIdentitySessionManager } from "@/domain/interfaces/IIdentitySessionManager";
+import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { IOidcManager } from "@/domain/interfaces/IOidcManager";
 import { getKeycloakIdentityService } from "@/services/auth/AuthProviders";
 
 interface IdentityContext {
-    manager: IIdentitySessionManager;
+    manager: IOidcManager;
     isAuthenticated: boolean;
-    rawToken: string | null;
-    syncAuth: () => Promise<{ isAuthenticated: boolean; accessToken: string | null; }>;
+    isReady: boolean;
+    syncAuth: () => Promise<{ isAuthenticated: boolean; isReady: boolean; }>;
 }
 
 const IdentitySessionContext: React.Context<IdentityContext | null> = createContext<IdentityContext | null>(null);
+let trackedManagerRef: IOidcManager | null = null; // Once-loaded defensive reference
 
 export const IdentitySessionProvider = ({ children }: { children: React.ReactNode }) => {
     const manager = getKeycloakIdentityService();
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-    const [rawToken, setRawToken] = useState<string | null>(null);
+    const [isReady, setIsReady] = useState<boolean>(false);
 
-    const syncAuth = async () => {
-        if (typeof window === "undefined") { return { isAuthenticated: false, accessToken: null }; }
+    // Memoize the sync auth function via a callback
+    const syncAuth = useCallback(async () => {
+        if (typeof window === "undefined") { return { isAuthenticated: false, isReady: false }; }
+
+        // Defensively check the memory address of the OIDC manager
+        if (trackedManagerRef && trackedManagerRef !== manager) {
+            console.error("Critical: The OIDC manager memory address has mutated between render frames", {
+                original: trackedManagerRef, current: manager
+            });
+        }
+
         const authStatus = await manager.isAuthenticated();
-        const tokenStr = manager.getRawAccessToken();
 
         setIsAuthenticated(authStatus);
-        setRawToken(tokenStr);
-        return { isAuthenticated: authStatus, accessToken: tokenStr };
-    }
+        setIsReady(true);
+        return { isAuthenticated: authStatus, isReady: true };
+    }, [manager]);
 
     // Initial check
     useEffect(() => {
+        // Capture the manager reference on initial component mount - prevent infinite re-render
+        if (trackedManagerRef === null && typeof window !== "undefined") {
+            trackedManagerRef = manager;
+        }
+
         // eslint-disable-next-line react-hooks/set-state-in-effect
         syncAuth();
-    }, []);
+    }, [syncAuth, manager]);
 
     // Mount the Keycloak Auth Manager service exactly once on mount
     return (
-        <IdentitySessionContext value={{ manager, isAuthenticated, rawToken, syncAuth }}>
+        <IdentitySessionContext value={{ manager, isAuthenticated, isReady, syncAuth }}>
             {children}
         </IdentitySessionContext>
     );

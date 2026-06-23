@@ -1,4 +1,4 @@
-import { IIdentitySessionManager } from "@/domain/interfaces/IIdentitySessionManager";
+import { IOidcManager, OidcProviderConfig, OidcTokenResponse } from "@/domain/interfaces/IOidcManager";
 import { generateCodeChallenge, generateCodeVerifier } from "@/utils/auth/pkce";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 
@@ -6,28 +6,36 @@ import { jwtDecode, JwtPayload } from "jwt-decode";
  * Keycloak Auth Manager
  * This class handles the authentication OIDC process for Keycloak specifically.
  */
-export class KeycloakAuthManager implements IIdentitySessionManager {
+export class KeycloakAuthManager implements IOidcManager {
+    private config!: OidcProviderConfig;
     private isRefreshing = false;
     private refreshQueue: Array<(token: string) => void> = [];
 
-    private getConfig() {
-        return {
-            keycloakUrl: process.env.NEXT_PUBLIC_KEYCLOAK_URL,
-            realm: "doorlist",
-            clientId: "doorlist-frontend",
-            redirectUri: `${process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:9080"}/auth/callback`,
-        }
+    public initialise(config: OidcProviderConfig): Promise<void> {
+        this.config = config;
+        /* 1. OIDC Discovery Loop? '/.well-known/openid-configuration' */
+        /* 2. Prepare Crypto primitives for DPoP? */
+        /* 3. Instantiate the module synchronously by awaiting promise - ready gate? */
+        return Promise.resolve();
     }
 
     private getTokenEndpoint(): string {
-        return `${this.getConfig().keycloakUrl}/realms/${this.getConfig().realm}/protocol/openid-connect/token`;
+        return `${this.config.authorityUrl}/protocol/openid-connect/token`;
     }
 
-    private storeTokens(accessToken: string, refreshToken: string, idToken?: string): void {
-        window.sessionStorage.setItem("doorlist_access_token", accessToken);
-        window.sessionStorage.setItem("doorlist_refresh_token", refreshToken);
-        if (idToken) {
-            window.sessionStorage.setItem("doorlist_id_token", idToken);
+    private getLoginEndpoint(): string {
+        return `${this.config.authorityUrl}/protocol/openid-connect/auth`;
+    }
+
+    private getLogoutEndpoint(): string {
+        return `${this.config.authorityUrl}/protocol/openid-connect/logout`;
+    }
+
+    private storeTokens(tokens: OidcTokenResponse): void {
+        window.sessionStorage.setItem("doorlist_access_token", tokens.access_token);
+        window.sessionStorage.setItem("doorlist_refresh_token", tokens.refresh_token);
+        if (tokens.id_token) {
+            window.sessionStorage.setItem("doorlist_id_token", tokens.id_token);
         }
     }
 
@@ -69,12 +77,13 @@ export class KeycloakAuthManager implements IIdentitySessionManager {
         window.sessionStorage.setItem("doorlist_csrf_nonce", state);
 
         // Construct the Keycloak endpoint URL
-        const authorisationUrl = new URL(`${this.getConfig().keycloakUrl}/realms/${this.getConfig().realm}/protocol/openid-connect/auth`);
+        const authorisationUrl = new URL(this.getLoginEndpoint());
         authorisationUrl.searchParams.append("response_type", "code");
-        authorisationUrl.searchParams.append("client_id", this.getConfig().clientId);
-        authorisationUrl.searchParams.append("redirect_uri", this.getConfig().redirectUri);
+        authorisationUrl.searchParams.append("client_id", this.config.clientId);
+        authorisationUrl.searchParams.append("redirect_uri", this.config.redirectUri);
         authorisationUrl.searchParams.append("state", state);
-        authorisationUrl.searchParams.append("scope", "openid profile email");
+
+        authorisationUrl.searchParams.append("scope", this.config.scopes.join(" "));
 
         authorisationUrl.searchParams.append("code_challenge", challenge);
         authorisationUrl.searchParams.append("code_challenge_method", "S256");
@@ -83,7 +92,7 @@ export class KeycloakAuthManager implements IIdentitySessionManager {
     }
 
     // Handle the PKCE callback for Keycloak
-    public async handleCallbackExchange(code: string | null, incomingState: string | null): Promise<string> {
+    public async handleCallbackExchange(code: string | null, incomingState: string | null): Promise<OidcTokenResponse> {
         const savedVerifier = window.sessionStorage.getItem("doorlist_pkce_verifier");
         const savedNonce = window.sessionStorage.getItem("doorlist_csrf_nonce");
 
@@ -99,9 +108,9 @@ export class KeycloakAuthManager implements IIdentitySessionManager {
         // Grab the access token from Keycloak
         const bodyParams = new URLSearchParams();
         bodyParams.append("grant_type", "authorization_code");
-        bodyParams.append("client_id", this.getConfig().clientId);
+        bodyParams.append("client_id", this.config.clientId);
         bodyParams.append("code", code);
-        bodyParams.append("redirect_uri", this.getConfig().redirectUri);
+        bodyParams.append("redirect_uri", this.config.redirectUri);
         bodyParams.append("code_verifier", savedVerifier);
 
         const response = await fetch(this.getTokenEndpoint(), {
@@ -114,29 +123,34 @@ export class KeycloakAuthManager implements IIdentitySessionManager {
         }
 
         // Persist the tokens
-        const tokens = await response.json();
-        if (typeof tokens.access_token !== "string" || typeof tokens.refresh_token !== "string") {
-            throw new Error("Couldn't find either the access_token or the refresh_token");
+        const tokens: OidcTokenResponse = await response.json();
+        if (
+            typeof tokens.access_token !== "string" ||
+            typeof tokens.refresh_token !== "string" ||
+            typeof tokens.expires_in !== "number" ||
+            typeof tokens.token_type !== "string")
+        {
+            throw new Error("OIDC token response missing key token elements.");
         }
-        this.storeTokens(tokens.access_token, tokens.refresh_token, tokens.id_token);
+        this.storeTokens(tokens);
 
         // Remove PKCE proofs
         window.sessionStorage.removeItem("doorlist_pkce_verifier");
         window.sessionStorage.removeItem("doorlist_csrf_nonce");
 
-        return tokens.access_token;
+        return tokens;
     }
 
     /**
      * Executes the RFC 6749 refresh_token POST to Keycloak
      * @param refreshToken requiring an existing session of course
      */
-    private async executeRefreshTokenGrant(refreshToken: string | null): Promise<string> {
+    private async executeRefreshTokenGrant(refreshToken: string | null): Promise<OidcTokenResponse> {
         if (!refreshToken) { throw new Error("Refresh token unavailable."); }
 
         const bodyParams = new URLSearchParams();
         bodyParams.append("grant_type", "refresh_token");
-        bodyParams.append("client_id", this.getConfig().clientId);
+        bodyParams.append("client_id", this.config.clientId);
         bodyParams.append("refresh_token", refreshToken);
 
         const response = await fetch(this.getTokenEndpoint(), {
@@ -148,12 +162,17 @@ export class KeycloakAuthManager implements IIdentitySessionManager {
             throw new Error(`Keycloak rejected the refresh grant: ${response.status} (${response.statusText})`);
         }
 
-        const tokens = await response.json();
-        if (typeof tokens.access_token !== "string" || typeof tokens.refresh_token !== "string") {
-            throw new Error("Couldn't find either the access_token or the refresh_token");
+        const tokens: OidcTokenResponse = await response.json();
+        if (
+            typeof tokens.access_token !== "string" ||
+            typeof tokens.refresh_token !== "string" ||
+            typeof tokens.expires_in !== "number" ||
+            typeof tokens.token_type !== "string")
+        {
+            throw new Error("OIDC token response missing key token elements.");
         }
-        this.storeTokens(tokens.access_token, tokens.refresh_token, tokens.id_token);
-        return tokens.access_token;
+        this.storeTokens(tokens);
+        return tokens;
     }
 
     /**
@@ -180,12 +199,12 @@ export class KeycloakAuthManager implements IIdentitySessionManager {
         this.isRefreshing = true;
 
         try {
-            const newAccessToken = await this.executeRefreshTokenGrant(refreshToken);
+            const tokenResponse: OidcTokenResponse = await this.executeRefreshTokenGrant(refreshToken);
 
-            this.refreshQueue.forEach((callback) => callback(newAccessToken));
+            this.refreshQueue.forEach((callback) => callback(tokenResponse.access_token));
             this.refreshQueue = [];
 
-            return newAccessToken;
+            return tokenResponse.access_token;
         } catch (err) {
             await this.logout();
             throw err;
@@ -201,8 +220,8 @@ export class KeycloakAuthManager implements IIdentitySessionManager {
         window.sessionStorage.removeItem("doorlist_refresh_token");
         window.sessionStorage.removeItem("doorlist_id_token");
 
-        const logoutUrl = new URL(`${this.getConfig().keycloakUrl}/realms/${this.getConfig().realm}/protocol/openid-connect/logout`);
-        logoutUrl.searchParams.set("client_id", this.getConfig().clientId);
+        const logoutUrl = new URL(this.getLogoutEndpoint());
+        logoutUrl.searchParams.set("client_id", this.config.clientId);
         logoutUrl.searchParams.set("post_logout_redirect_uri", `${window.location.origin}/`);
 
         if (idToken) {

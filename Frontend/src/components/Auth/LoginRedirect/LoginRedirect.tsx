@@ -5,12 +5,14 @@ import { ActionLink } from "@/components/Navigation/NavComponents/ActionLink/Act
 
 import { useIdentitySession } from "@/services/auth/IdentityServiceProvider";
 
-export const LoginRedirect = () => {
+
+
+export const LoginRedirect = ({ disabled = false }) => {
     const [isRedirecting, setIsRedirecting] = useState<boolean>(false);
     const identitySession = useIdentitySession();
 
     const handleLoginAction = async () => {
-        if (isRedirecting) { return; }
+        if (isRedirecting || disabled) { return; }
         setIsRedirecting(true);
 
         try {
@@ -24,8 +26,8 @@ export const LoginRedirect = () => {
     }
 
     return (
-        <ActionLink onClick={handleLoginAction} disabled={isRedirecting}>
-            <h4>Login</h4>
+        <ActionLink onClick={handleLoginAction} disabled={isRedirecting || disabled}>
+            <h4>{isRedirecting ? "..." : "Login" }</h4>
         </ActionLink>
     );
 }

@@ -3,19 +3,21 @@
 import React, { useState } from "react";
 import { ActionLink } from "@/components/Navigation/NavComponents/ActionLink/ActionLink";
 
-import { buildKeycloakAuthorizationUrl } from "@/services/auth/keycloakAuthService";
+import { useIdentitySession } from "@/services/auth/IdentityServiceProvider";
 
 
-export const LoginRedirect = () => {
+
+export const LoginRedirect = ({ disabled = false }) => {
     const [isRedirecting, setIsRedirecting] = useState<boolean>(false);
+    const identitySession = useIdentitySession();
 
     const handleLoginAction = async () => {
-        if (isRedirecting) { return; }
+        if (isRedirecting || disabled) { return; }
         setIsRedirecting(true);
 
         try {
             // Build URL, redirect.
-            const authUrl = await buildKeycloakAuthorizationUrl();
+            const authUrl = await identitySession.manager.buildAuthorisationUrl();
             window.location.href = authUrl;
         } catch (err) {
             console.error(`Failed to assemble PKCE redirect URL for login: ${err}`);
@@ -24,8 +26,8 @@ export const LoginRedirect = () => {
     }
 
     return (
-        <ActionLink onClick={handleLoginAction} disabled={isRedirecting}>
-            <h4>Login</h4>
+        <ActionLink onClick={handleLoginAction} disabled={isRedirecting || disabled}>
+            <h4>{isRedirecting ? "..." : "Login" }</h4>
         </ActionLink>
     );
 }

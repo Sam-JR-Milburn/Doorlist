@@ -3,11 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { handleAuthCallbackExchange } from "@/services/auth/keycloakAuthService";
+import { useIdentitySession } from "@/services/auth/IdentityServiceProvider";
 
 export default function AuthCallbackPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
+    const { manager, syncAuth } = useIdentitySession();
+
     const exchangeAttempted = useRef(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -20,16 +22,14 @@ export default function AuthCallbackPage() {
 
         const executeVerification = async () => {
             try {
-                const tokens = await handleAuthCallbackExchange(code, incomingState);
+                await manager.handleCallbackExchange(code, incomingState); // Handles logic, validation and token persistence
 
-                window.sessionStorage.setItem("doorlist_access_token", tokens.accessToken);
-
-                // DEBUG
-                console.log("Access Token: "+tokens.accessToken);
-                console.log("ID Token: "+tokens.idToken);
-                console.log("Refresh Token: "+tokens.refreshToken);
-
-                router.push("/dashboard");
+                const session = await syncAuth();
+                if (session.isAuthenticated) {
+                    router.push("/dashboard");
+                } else {
+                    throw new Error("Handshake succeeded but the session couldn't be authenticated locally");
+                }
             } catch (err) {
                 console.error(`Cryptographic token validation failed: ${err}`);
                 setError((err as Error).message || "Cryptographic token validation failed");
@@ -37,7 +37,7 @@ export default function AuthCallbackPage() {
         }
 
         executeVerification();
-    }, [searchParams, router]);
+    }, [searchParams, router, manager, syncAuth]);
 
     // Conditional render?
     if (error) {

@@ -3,12 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p ${DOORLIST_FRONTEND_HTTP_PORT:-9080}",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p ${DOORLIST_FRONTEND_HTTP_PORT:-9080}",
     "lint": "eslint"
   },
   "dependencies": {
+    "jwt-decode": "^4.0.0",
     "next": "16.2.6",
     "react": "19.2.4",
     "react-dom": "19.2.4"

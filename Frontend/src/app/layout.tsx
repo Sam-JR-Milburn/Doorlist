@@ -21,8 +21,11 @@ export default function RootLayoutContainer({
   return (
     <html lang="en" className={neueHaas.className}>
     <body>
-      <RootLayout>{children}</RootLayout>
+        <RootLayout>
+          {children}
+        </RootLayout>
     </body>
     </html>
   );
 }
+

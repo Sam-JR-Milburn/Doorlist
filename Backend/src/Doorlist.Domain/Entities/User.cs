@@ -11,6 +11,9 @@ public class User
     // Unique ID
     public Guid Id { get; private set; }
     
+    // Organisational access, if registered. 
+    public Guid? TenantId { get; private set; }
+    
     // External identities linked to the user. N:1.
     private readonly List<UserLogin> _logins = new();
     public IReadOnlyCollection<UserLogin> Logins => _logins;
@@ -33,6 +36,30 @@ public class User
         LastName = lastName;
         DateOfBirth = dateOfBirth;
         Restricted = false;
+        TenantId = null;
+    }
+
+    /// <summary>
+    /// Link a user to an organisation.
+    /// </summary>
+    /// <param name="tenantId">Reference to the organisation tenant</param>
+    public bool AssignToTenant(Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return false;
+        if (TenantId == tenantId) return true;
+        
+        TenantId = tenantId;
+        return true;
+    }
+
+    /// <summary>
+    /// Unlink the user from an organisation.
+    /// </summary>
+    public bool RemoveFromTenant()
+    {
+        if (TenantId == null) return false;
+        TenantId = null;
+        return true;
     }
     
     /// <summary>

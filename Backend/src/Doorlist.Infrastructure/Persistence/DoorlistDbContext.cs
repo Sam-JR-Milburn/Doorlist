@@ -1,7 +1,6 @@
 namespace Doorlist.Infrastructure.Persistence;
 
 using Microsoft.EntityFrameworkCore;
-
 using Domain.Entities;
 
 /// <summary>
@@ -14,7 +13,7 @@ public class DoorlistDbContext : DbContext
     // Tables
     public DbSet<User> Users => Set<User>();
     public DbSet<UserLogin> UserLogins => Set<UserLogin>();
-    
+    public DbSet<Tenant> Tenants => Set<Tenant>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

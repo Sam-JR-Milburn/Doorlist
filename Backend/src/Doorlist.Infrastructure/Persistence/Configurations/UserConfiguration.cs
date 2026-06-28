@@ -20,6 +20,14 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasColumnType("date")
             .IsRequired();
         
+        // Reference the tenancy table
+        builder.HasOne<Tenant>()
+            .WithMany()
+            .HasForeignKey(x => x.TenantId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.SetNull);
+        builder.HasIndex(x => x.TenantId);
+        
         // Assists the User logins field encapsulation 
         builder.Metadata.FindNavigation(nameof(User.Logins))!.SetPropertyAccessMode(PropertyAccessMode.Field); 
         

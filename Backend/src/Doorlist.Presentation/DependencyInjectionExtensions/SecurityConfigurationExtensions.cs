@@ -16,7 +16,7 @@ public static class SecurityConfigurationExtensions
         IConfiguration configuration)
     {
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
+            .AddJwtBearer("Authentication", options =>
             {
                 // Check for the auth server and realm, don't build into an invalid state 
                 var authServerUrl = configuration["Keycloak:AuthServerUrl"]?.TrimEnd('/');
@@ -52,7 +52,9 @@ public static class SecurityConfigurationExtensions
                         $"https://doorlist_keycloak_server:8443/realms/{realm}/"
                     }
                 };
-            }); 
+            })
+            // Authorisation after Token Exchange?
+            ; 
         
         return services;
     }

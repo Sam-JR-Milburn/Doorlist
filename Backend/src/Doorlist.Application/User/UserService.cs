@@ -46,18 +46,18 @@ public class UserService : IUserService
             // Attempt to save the user to the DB
             await _userRepository.AddUserAsync(user); 
             var dbResult = await _unitOfWork.SaveChangesAsync(cancellationToken);
-            if (dbResult == 0) return Result<UserRegistrationResponseDto>.Failure("Database save failed", ErrorType.DependencyFailure);
+            if (dbResult == 0) return Result<UserRegistrationResponseDto>.Failure("Database issues", ErrorType.DependencyFailure);
             
             // Attempt registration, rollback on failure.
             var identityResult = await _identityProvisionerService.CreateUserAsync(registrationData.Email, registrationData.Password, user.Id, cancellationToken);
             if (!identityResult.IsSuccess)
             {
-                return Result<UserRegistrationResponseDto>.Failure(identityResult.ErrorMessage ?? "", identityResult.ErrorType);
+                return Result<UserRegistrationResponseDto>.Failure(identityResult.ErrorMessage ?? "There was a generic failure in creating the user", identityResult.ErrorType);
             }
             
             createdKeycloakSub = identityResult.Value; // Store for possible rollback
             
-            // Link login record - Issuer: Keycloak
+            // Link login record - Issuer: Keycloak. There is an implicit rollback here on failure, before the commit. 
             user.LinkIdentity(_identityProvisionerService.ProviderName, createdKeycloakSub!, _identityProvisionerService.Issuer);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             
@@ -85,4 +85,7 @@ public class UserService : IUserService
             return Result<UserRegistrationResponseDto>.Failure(ex.Message, ErrorType.DependencyFailure);
         }
     }
+    
+    // ----
+    
 }

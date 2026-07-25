@@ -17,7 +17,7 @@ using Microsoft.AspNetCore.Mvc;
 public class UserController :  ControllerBase
 {
     private readonly ILogger<UserController> _logger;
-    private  readonly IUserService _userService;
+    private readonly IUserService _userService;
     public UserController(ILogger<UserController> logger, IUserService userService)
     {
         _logger = logger;
@@ -50,19 +50,19 @@ public class UserController :  ControllerBase
             if (result.IsSuccess)
             {
                 UserRegistrationResponseDto? resultData = result.Value;
-                return CreatedAtRoute(nameof(GetUserById), new { id = resultData?.UserId }, resultData);
+                return CreatedAtRoute(nameof(GetUserById), new { id = resultData?.UserId }, resultData); // HTTP 201: Here's the created user
             }
 
             switch (result.ErrorType)
             {
                 case ErrorType.Validation:
-                    return BadRequest(result.ErrorMessage); // Date parsing issues
+                    return BadRequest(result.ErrorMessage); // HTTP 400: Date parsing issues
                 case ErrorType.Conflict:
-                    return Conflict(result.ErrorMessage); // If the email already exists
+                    return Conflict(result.ErrorMessage); // HTTP 409: If the email already exists
                 case ErrorType.DependencyFailure:
                     return
                         StatusCode(503,
-                            result.ErrorMessage); // Service Unavailable, if either Keycloak or the DB repos are down.
+                            result.ErrorMessage); // HTTP 503: Service Unavailable, if either Keycloak or the DB repos are down.
                 default:
                     return BadRequest(result.ErrorMessage);
             }
@@ -93,7 +93,7 @@ public class UserController :  ControllerBase
     [AllowAnonymous]
     [HttpPost]
     [Route("registerUserExternal")]
-    public async Task<IActionResult> RegisterUserExternal()
+    public async Task<IActionResult> RegisterUserExternal(/* DTOs here later */)
     {
         return StatusCode(500, "Not Implemented");
     }
@@ -102,7 +102,7 @@ public class UserController :  ControllerBase
     /// Get User details about a GUID.
     /// </summary>
     /// <remarks>
-    /// This will be the first real area touching authorisation
+    /// This will be the among the first real areas touching authorisation
     /// </remarks>
     [Authorize]
     [HttpGet("{id:guid}", Name = nameof(GetUserById))]

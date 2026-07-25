@@ -21,12 +21,12 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired();
         
         // Reference the tenancy table
-        builder.HasOne<Tenant>()
+        builder.HasOne<Organisation>()
             .WithMany()
-            .HasForeignKey(x => x.TenantId)
+            .HasForeignKey(x => x.OrganisationId)
             .IsRequired(false)
             .OnDelete(DeleteBehavior.SetNull);
-        builder.HasIndex(x => x.TenantId);
+        builder.HasIndex(x => x.OrganisationId);
         
         // Assists the User logins field encapsulation 
         builder.Metadata.FindNavigation(nameof(User.Logins))!.SetPropertyAccessMode(PropertyAccessMode.Field); 

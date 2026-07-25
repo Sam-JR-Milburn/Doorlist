@@ -4,15 +4,15 @@ using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-public class TenantConfiguration : IEntityTypeConfiguration<Tenant>
+public class OrganisationConfiguration : IEntityTypeConfiguration<Organisation>
 {
-    public void Configure(EntityTypeBuilder<Tenant> builder)
+    public void Configure(EntityTypeBuilder<Organisation> builder)
     {
-        builder.ToTable("tenants");
+        builder.ToTable("organisations");
         
         builder.HasKey(t => t.Id);
         
-        builder.Property(t => t.TenantName)
+        builder.Property(t => t.OrganisationName)
             .HasMaxLength(256)
             .IsRequired();
     }

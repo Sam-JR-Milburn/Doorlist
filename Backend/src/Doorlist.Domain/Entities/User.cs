@@ -12,7 +12,7 @@ public class User
     public Guid Id { get; private set; }
     
     // Organisational access, if registered. 
-    public Guid? TenantId { get; private set; }
+    public Guid? OrganisationId { get; private set; }
     
     // External identities linked to the user. N:1.
     private readonly List<UserLogin> _logins = new();
@@ -36,7 +36,7 @@ public class User
         LastName = lastName;
         DateOfBirth = dateOfBirth;
         Restricted = false;
-        TenantId = null;
+        OrganisationId = null;
     }
 
     /// <summary>
@@ -46,9 +46,9 @@ public class User
     public bool AssignToTenant(Guid tenantId)
     {
         if (tenantId == Guid.Empty) return false;
-        if (TenantId == tenantId) return true;
+        if (OrganisationId == tenantId) return true;
         
-        TenantId = tenantId;
+        OrganisationId = tenantId;
         return true;
     }
 
@@ -57,8 +57,8 @@ public class User
     /// </summary>
     public bool RemoveFromTenant()
     {
-        if (TenantId == null) return false;
-        TenantId = null;
+        if (OrganisationId == null) return false;
+        OrganisationId = null;
         return true;
     }
     

@@ -1,8 +1,8 @@
 namespace Doorlist.Presentation.Controllers;
 
 using System.Security.Claims;
-using Application.User;
-using Application.User.DTOs;
+using Application.Entities.User;
+using Application.Entities.User.DTOs;
 using Domain.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -25,7 +25,8 @@ public class UserController :  ControllerBase
     }
 
     /// <summary>
-    ///  Fully register a user with Keycloak.
+    /// Fully register a user with Doorlist.
+    /// At present, that's with the Keycloak authentication service.
     /// </summary>
     [AllowAnonymous]
     [HttpPost]
@@ -106,7 +107,7 @@ public class UserController :  ControllerBase
     /// </remarks>
     [Authorize]
     [HttpGet("{id:guid}", Name = nameof(GetUserById))]
-    // Produces Response Type here
+    // Needs auth controller - site read_users and also the exact user themselves
     public async Task<IActionResult> GetUserById(Guid id)
     {
         throw new NotImplementedException();

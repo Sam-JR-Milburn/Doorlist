@@ -1,7 +1,7 @@
 namespace Doorlist.Application;
 
 using Microsoft.Extensions.DependencyInjection;
-using User;
+using Doorlist.Application.Entities.User;
 
 public static class DependencyInjection
 {

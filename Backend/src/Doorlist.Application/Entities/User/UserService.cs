@@ -1,4 +1,4 @@
-namespace Doorlist.Application.User;
+namespace Doorlist.Application.Entities.User;
 
 using Microsoft.Extensions.Logging;
 

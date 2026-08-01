@@ -1,6 +1,6 @@
 namespace Doorlist.Infrastructure.Security;
 
-using Doorlist.Domain.Utility;
+using Doorlist.Domain.Utility.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;

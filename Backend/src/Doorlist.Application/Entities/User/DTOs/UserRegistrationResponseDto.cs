@@ -1,4 +1,4 @@
-namespace Doorlist.Application.User.DTOs;
+namespace Doorlist.Application.Entities.User.DTOs;
 
 public record UserRegistrationResponseDto
 {

@@ -38,29 +38,6 @@ public class User
         Restricted = false;
         OrganisationId = null;
     }
-
-    /// <summary>
-    /// Link a user to an organisation.
-    /// </summary>
-    /// <param name="tenantId">Reference to the organisation tenant</param>
-    public bool AssignToTenant(Guid tenantId)
-    {
-        if (tenantId == Guid.Empty) return false;
-        if (OrganisationId == tenantId) return true;
-        
-        OrganisationId = tenantId;
-        return true;
-    }
-
-    /// <summary>
-    /// Unlink the user from an organisation.
-    /// </summary>
-    public bool RemoveFromTenant()
-    {
-        if (OrganisationId == null) return false;
-        OrganisationId = null;
-        return true;
-    }
     
     /// <summary>
     /// Link an external auth provider to this identity. 

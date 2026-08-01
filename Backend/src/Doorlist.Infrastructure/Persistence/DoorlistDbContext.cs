@@ -13,7 +13,8 @@ public class DoorlistDbContext : DbContext
     // Tables
     public DbSet<User> Users => Set<User>();
     public DbSet<UserLogin> UserLogins => Set<UserLogin>();
-    public DbSet<Organisation> Tenants => Set<Organisation>();
+    public DbSet<Organisation> Organisations => Set<Organisation>();
+    public DbSet<OrganisationInvite> OrganisationInvites => Set<OrganisationInvite>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

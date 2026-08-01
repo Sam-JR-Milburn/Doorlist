@@ -1,9 +1,7 @@
 namespace Doorlist.Domain.Entities;
 
-
 /// <summary>
-/// Organisation represents membership of a business, venue, etc.
-/// It's a stub for now.
+/// Organisations represent a business unit booking or operating music venues, etc etc.
 /// </summary>
 public class Organisation
 {

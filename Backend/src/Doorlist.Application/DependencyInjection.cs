@@ -1,7 +1,8 @@
 namespace Doorlist.Application;
 
 using Microsoft.Extensions.DependencyInjection;
-using Doorlist.Application.Entities.User;
+using Doorlist.Application.Services.User;
+using Doorlist.Application.Services.Organisation;
 
 public static class DependencyInjection
 {
@@ -9,6 +10,7 @@ public static class DependencyInjection
     {
         // Application services
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IOrganisationService, OrganisationService>();
         
         return services;
     }

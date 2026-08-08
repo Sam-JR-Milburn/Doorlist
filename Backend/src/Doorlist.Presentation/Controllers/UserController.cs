@@ -1,8 +1,9 @@
 namespace Doorlist.Presentation.Controllers;
 
 using System.Security.Claims;
-using Application.Entities.User;
-using Application.Entities.User.DTOs;
+using Application.Services.User;
+using Application.Services.User.DTO.Requests;
+using Application.Services.User.DTO.Responses;
 using Domain.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -10,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 
 /// <summary>
 /// Users: configure user profiles and metadata.
-/// Keycloak handles AuthN and AuthZ. 
+/// Keycloak handles AuthN.  
 /// </summary>
 [ApiController]
 [Route("/api/[controller]")]

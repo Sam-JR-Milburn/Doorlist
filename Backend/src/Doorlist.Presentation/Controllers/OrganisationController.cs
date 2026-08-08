@@ -1,7 +1,7 @@
 namespace Doorlist.Presentation.Controllers;
 
-using Application.Organisation;
-using Application.Entities.User;
+using Application.Services.Organisation;
+using Application.Services.User;
 using Microsoft.AspNetCore.Mvc;
 
 /// <summary>
@@ -14,91 +14,56 @@ public class OrganisationController : ControllerBase
     private readonly ILogger<OrganisationController> _logger;
     
     private readonly IOrganisationService _organisationService;
-    private readonly IOrganisationMembershipService _organisationMembershipService;
     
-    public OrganisationController(ILogger<OrganisationController> logger, IOrganisationService organisationService, IOrganisationMembershipService organisationMembershipService)
+    public OrganisationController(ILogger<OrganisationController> logger, IOrganisationService organisationService)
     {
         _logger = logger;
         
         _organisationService = organisationService;
-        _organisationMembershipService = organisationMembershipService;
     }
-    
-    /**
-     * Link/join flow: 
-     * Invite link: organisation member with 'manage_members' permission can generate an invite link targeting a specific user id.
-     * It has to be accepted by that user willingly - using their own perm flows.
-     *
-     * Unlink/exit flow:
-     * Either someone with manage_members on that organisation (who isn't the owner) or the user themselves - user guid with 'self' action 
-     * ----
-     * ----
-     */
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    /*
-    // This should be a site admin level flow 
-     
-    /// <summary>
-    /// Assign a user to an organisation.
-    /// </summary>
-    /// <param name="organisationId"></param>
-    /// <param name="userId"></param>
-    /// <returns></returns>
-    [HttpPost]
-    [Route("linkUser")]
-    public async Task<IActionResult> LinkUserToOrganisation(Guid organisationId, Guid userId)
-    {
-        return BadRequest();
-    }
-    */
-    
-    
-    
-    
-    
-    
-    //public async Task<IActionResult> Get()
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    // Requires either the user themselves or an admin with manage_members permission
     
     /// <summary>
-    /// Unassign a user from an organisation.
+    /// Create an organisation.
+    /// Will set your account as the owner, and creation will be prevented if you're already a member of an organisation. 
     /// </summary>
-    /// <param name="organisationId"></param>
-    /// <param name="userId"></param>
-    /// <returns></returns>
     [HttpPost]
-    [Route("unlinkUser")]
-    // Requires URN perms for that particular user or site read_users
-    public async Task<IActionResult> UnlinkUserFromOrganisation(Guid organisationId, Guid userId)
+    [Route("create")]
+    public async Task<IActionResult> CreateOrganisation(CancellationToken requestAborted)   
     {
-        return BadRequest();
+        throw new NotImplementedException();
     }
+    
+    /// <summary>
+    /// Delete an organisation, if you have ownership rights over it.
+    /// </summary>
+    [HttpDelete]
+    [Route("delete/{id:guid}")]
+    // [RequiresRichAuth(ResourceType = "organisation", Actions = new new[] { "manage_organisation", "delete" }]
+    // [RequiresRichAuth(ResourceType = "admin", Actions = new[] { "manage_users" })]
+    public async Task<IActionResult> DeleteOrganisation()
+    {
+        throw new NotImplementedException();
+    }
+    
+    /// <summary>
+    /// Invite a user to an organisation
+    /// </summary>
+    [HttpPatch]
+    [Route("{id:guid}/invite")]
+    // [RequiresRichAuth(ResourceType = "organisation", Actions = new []{ "" })]
+    public async Task<IActionResult> InviteUserToOrganisation()
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Unlink/remove a user from an organisation
+    /// </summary>
+    [HttpPatch]
+    [Route("{id:guid}/withdraw")]
+    public async Task<IActionResult> WithdrawUserFromOrganisation()
+    {
+        throw new NotImplementedException();
+    }
+    
 }

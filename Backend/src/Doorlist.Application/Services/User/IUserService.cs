@@ -1,7 +1,8 @@
-namespace Doorlist.Application.Entities.User;
+namespace Doorlist.Application.Services.User;
 
 using Domain.Utility;
-using DTOs;
+using DTO.Requests;
+using DTO.Responses;
 
 public interface IUserService
 {

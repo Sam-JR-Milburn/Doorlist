@@ -1,11 +1,12 @@
-namespace Doorlist.Application.Entities.User;
+namespace Doorlist.Application.Services.User;
 
 using Microsoft.Extensions.Logging;
 
 using Domain.Entities;
 using Domain.Interfaces.User;
 using Domain.Utility;
-using DTOs;
+using DTO.Requests;
+using DTO.Responses;
 using Identity;
 using Microsoft.AspNetCore.Mvc;
 

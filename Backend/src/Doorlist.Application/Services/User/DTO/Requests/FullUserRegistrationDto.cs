@@ -1,4 +1,4 @@
-namespace Doorlist.Application.Entities.User.DTOs;
+namespace Doorlist.Application.Services.User.DTO.Requests;
 
 using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;

@@ -15,7 +15,8 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddCustomSwaggerGen();
 builder.Services.AddCustomCorsPolicy(builder.Configuration, builder.Environment);
-builder.Services.AddKeycloakJwtAuthentication(builder.Configuration);
+builder.Services.AddAuthenticationScheme(builder.Configuration);
+
 
 // Clean architecture core layers
 builder.Services.AddApplicationServices();

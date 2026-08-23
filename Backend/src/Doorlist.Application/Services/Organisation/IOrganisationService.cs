@@ -7,5 +7,5 @@ using Domain.Utility;
 /// </summary>
 public interface IOrganisationService
 {
-    public Task<Result<Boolean>> CreateOrganisationAsync(CancellationToken requestAborted);
+    public Task<Result<Boolean>> CreateOrganisationAsync(Guid userId, CancellationToken requestAborted);
 }

@@ -2,6 +2,8 @@ namespace Doorlist.Presentation.Controllers;
 
 using Application.Services.Organisation;
 using Application.Services.User;
+using Infrastructure.Security.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 /// <summary>
@@ -9,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 /// </summary>
 [ApiController]
 [Route("/api/[controller]")]
-public class OrganisationController : ControllerBase
+public class OrganisationController : ApiControllerBase
 {
     private readonly ILogger<OrganisationController> _logger;
     
@@ -28,9 +30,16 @@ public class OrganisationController : ControllerBase
     /// </summary>
     [HttpPost]
     [Route("create")]
-    public async Task<IActionResult> CreateOrganisation(CancellationToken requestAborted)   
+    [Authorize(AuthenticationSchemes = "Authentication")]
+    public async Task<IActionResult> CreateOrganisation(CancellationToken requestAborted)
     {
-        throw new NotImplementedException();
+        var result = _organisationService.CreateOrganisationAsync(this.CurrentUserId, requestAborted);
+        
+        //
+        // Return DTO? 
+        //
+        
+        return Ok();
     }
     
     /// <summary>
@@ -38,7 +47,7 @@ public class OrganisationController : ControllerBase
     /// </summary>
     [HttpDelete]
     [Route("delete/{id:guid}")]
-    // [RequiresRichAuth(ResourceType = "organisation", Actions = new new[] { "manage_organisation", "delete" }]
+    // [RequiresRichAuth(ResourceType = "organisation", Actions = new[] { "manage_organisation", "delete" }]
     // [RequiresRichAuth(ResourceType = "admin", Actions = new[] { "manage_users" })]
     public async Task<IActionResult> DeleteOrganisation()
     {

@@ -7,7 +7,7 @@ using Domain.Utility;
 /// </summary>
 public class OrganisationService : IOrganisationService
 {
-    public async Task<Result<Boolean>> CreateOrganisationAsync(CancellationToken requestAborted)
+    public async Task<Result<Boolean>> CreateOrganisationAsync(Guid userId, CancellationToken requestAborted)
     {
         throw new NotImplementedException();
     }

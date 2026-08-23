@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 /// </summary>
 [ApiController]
 [Route("/api/[controller]")]
-public class UserController :  ControllerBase
+public class UserController : ApiControllerBase
 {
     private readonly ILogger<UserController> _logger;
     private readonly IUserService _userService;

@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 
 using Doorlist.Application;
-using Doorlist.Infrastructure.Security;
+using Doorlist.Infrastructure.Security.Services;
 
 public static class DependencyInjection
 {
@@ -30,6 +30,8 @@ public static class DependencyInjection
         
         // Setup identity provisioners
         services.AddIdentityInfrastructure(configuration);
+        
+        // ----
         
         return services;
     }

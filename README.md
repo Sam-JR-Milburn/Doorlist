@@ -8,6 +8,10 @@ It is a portfolio project and a practice exercise in delivering a fully fledged 
 
 ### Documentation
 
-I've written some documentation to accompany the code, which I hope is self-documenting, and to explain various design choices.
+### Backend - C# Web API
 
-Check it out [here](Documentation/documentation.md).
+[Backend Documentation](Backend/backend.md)
+
+### Frontend - NextJS with TypeScript
+
+[Frontend Documentation](Frontend/frontend.md)

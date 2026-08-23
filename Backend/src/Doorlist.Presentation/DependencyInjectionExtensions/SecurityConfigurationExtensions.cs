@@ -10,9 +10,9 @@ using Microsoft.IdentityModel.Tokens;
 public static class SecurityConfigurationExtensions
 {
     /// <summary>
-    /// Add Keycloak JWT token bearing
+    /// Add authentication scheme: Keycloak as IdP
     /// </summary>
-    public static IServiceCollection AddKeycloakJwtAuthentication(this IServiceCollection services,
+    public static IServiceCollection AddAuthenticationScheme(this IServiceCollection services,
         IConfiguration configuration)
     {
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -52,10 +52,19 @@ public static class SecurityConfigurationExtensions
                         $"https://doorlist_keycloak_server:8443/realms/{realm}/"
                     }
                 };
-            })
-            // Authorisation after Token Exchange?
-            ; 
+            });
         
+        return services;
+    }
+
+    /// <summary>
+    /// Add authorisation scheme. 
+    /// </summary>
+    /// <remarks>
+    /// Not yet implemented. Intention to use a token exchange system, sourced from the API. 
+    /// </remarks>
+    public static IServiceCollection AddAuthorisation(this IServiceCollection services, IConfiguration configuration)
+    {
         return services;
     }
 }

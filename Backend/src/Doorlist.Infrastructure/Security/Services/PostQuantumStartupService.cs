@@ -1,4 +1,4 @@
-namespace Doorlist.Infrastructure.Security;
+namespace Doorlist.Infrastructure.Security.Services;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
